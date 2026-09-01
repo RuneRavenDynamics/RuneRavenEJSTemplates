@@ -34,10 +34,13 @@
 
       billingPane.innerHTML = "";
 
-      await api.tools.FM.getStripeCustomerPaymentMethodsElement({
+      await api.finance.element({
+          element: "paymentmethodselect",
+          provider: "stripe",
+          id: "account-billing-paymentselect",
           parent: billingPane,
-          customer,
-          stripeaccount
+          stripeaccount,
+          customer
       });
     }
 

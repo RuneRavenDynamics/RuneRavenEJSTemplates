@@ -1,0 +1,57 @@
+<div class="container my-3">
+  <div class="card shadow">
+    <div class="card-header text-white">
+      <h3 class="mb-0">Checkout</h3>
+    </div>
+    <div class="card-body" id="payment-checkout-element">
+
+    </div>
+  </div>
+</div>
+
+<script type="module">
+    import { api } from "https://cdn.runeravendynamics.com/clientapi/latest/api.bundle.js";
+
+    await api.initialize();
+
+    async function setupBilling() {
+      const billingPane = document.querySelector("#payment-checkout-element");
+
+      let paymentDataElement = document.querySelector('#payment-data-element');
+      let data = JSON.parse(paymentDataElement.textContent);
+
+      let stripeaccount
+      
+      if (data?.options?.provider?.id) {
+        stripeaccount = await api.graph.get(data.options.provider.id, "stripeaccount");
+      } else {
+        stripeaccount = await api.graph.getNode(api.tools.A.info.business, "children", { type: "stripeaccount" });
+      }
+
+      const customer = await api.graph.getNode(api.tools.A.info.user, "siblings", { type: "customer" }) || null;
+
+      if (!stripeaccount) {
+          console.log("No Stripe account found for business.");
+          return;
+      }
+
+      billingPane.innerHTML = "";
+
+      await api.finance.element({
+          element: "payment",
+          provider: "stripe",
+          id: "business-payment-element",
+          parent: billingPane,
+          stripeaccount,
+          customer,
+          createIntentParams: {
+              amount: 100,
+              currency: 'USD',
+              application_fee_amount: 0,
+              description: null,
+          },
+      });
+    }
+
+    await setupBilling();
+</script>

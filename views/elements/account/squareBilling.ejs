@@ -15,24 +15,34 @@
 
     await api.initialize();
 
-    const billingPane = document.querySelector("#billing-tab-pane .card-body");
+    async function setupBilling() {
+      const billingPane = document.querySelector("#billing-tab-pane .card-body");
 
-    // Get Square account object for this business
-    const squareaccount = await api.graph.getNode(api.tools.A.info.business, "children", { type: "squareaccount" });
+      const squareaccount = await api.graph.getNode(api.tools.A.info.business, "children", { type: "squareaccount" });
 
-    if (squareaccount && squareaccount?.info) {
-        
-        let customerObj = await api.graph.getNode(api.tools.A.info.user, "siblings", { type: "customer" });
+      const customer = await api.graph.getNode(api.tools.A.info.user, "siblings", { type: "customer" });
 
-        await api.tools.FM.buildSquareCustomerCardsElement({
-            parent: billingPane,
-            customer: customerObj,
-            account: api.tools.A.info.user,
-            squareaccount: squareaccount,
-        });
+      if (!stripeaccount) {
+          console.log("No Square account found for business.");
+          return;
+      }
 
-      
-    } else {
-      console.log("No Square Account Provided...");
+      if (!customer?.info?.third_party?.stripe?.id) {
+          console.log("No Square customer ID found for user/customer.");
+          return;
+      }
+
+      billingPane.innerHTML = "";
+
+      await api.finance.element({
+          element: "paymentmethodselect",
+          provider: "square",
+          id: "account-billing-paymentselect",
+          parent: billingPane,
+          squareaccount,
+          customer
+      });
     }
+
+    await setupBilling();
 </script>

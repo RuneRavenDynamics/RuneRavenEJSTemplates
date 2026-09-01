@@ -1,0 +1,57 @@
+<div class="container my-3">
+  <div class="card shadow">
+    <div class="card-header text-white">
+      <h3 class="mb-0">Checkout</h3>
+    </div>
+    <div class="card-body" id="payment-checkout-element">
+
+    </div>
+  </div>
+</div>
+
+<script type="module">
+    import { api } from "https://cdn.runeravendynamics.com/clientapi/latest/api.bundle.js";
+
+    await api.initialize();
+
+    async function setupBilling() {
+      const billingPane = document.querySelector("#payment-checkout-element");
+
+      let paymentDataElement = document.querySelector('#payment-data-element');
+      let data = JSON.parse(paymentDataElement.textContent);
+
+      let squareaccount
+      
+      if (data?.options?.provider?.id) {
+        squareaccount = await api.graph.get(data.options.provider.id, "squareaccount");
+      } else {
+        squareaccount = await api.graph.getNode(api.tools.A.info.business, "children", { type: "squareaccount" });
+      }
+      
+      const customer = await api.graph.getNode(api.tools.A.info.user, "siblings", { type: "customer" }) || null;
+
+      if (!stripeaccount) {
+          console.log("No Square account found for business.");
+          return;
+      }
+
+      billingPane.innerHTML = "";
+
+      await api.finance.element({
+          element: "payment",
+          provider: "square",
+          id: "business-payment-element",
+          parent: billingPane,
+          squareaccount,
+          customer,
+          payment_settings: {
+              amount: 100,
+              currency: "usd",
+              app_fee: 0,
+              description: null
+          },
+      });
+    }
+
+    await setupBilling();
+</script>
