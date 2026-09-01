@@ -1,5 +1,5 @@
 git add .
 git commit -m "update"
-npm version patch
-npm publish
-git push origin main --follow-tags
+git push origin main
+
+npm update @runeravendynamics/runeravenejstemplates
