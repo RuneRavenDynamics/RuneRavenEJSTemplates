@@ -1,5 +1,5 @@
 git add .
 git commit -m "update"
-git push origin main
-
-npm install github:RuneRavenDynamics/RuneRavenEJSTemplates
+npm version patch
+npm publish
+git push origin main --follow-tags
