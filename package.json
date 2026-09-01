@@ -1,16 +1,16 @@
 {
     "name": "@runeravendynamics/runeravenejstemplates",
     "version": "1.0.0",
-    "private": true,
-    "description": "",
-    "license": "ISC",
-    "author": "",
-    "type": "module",
+    "description": "Shared RuneRaven EJS templates",
     "main": "index.js",
     "files": [
         "views"
     ],
-    "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
+    "publishConfig": {
+        "registry": "https://npm.pkg.github.com"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/RuneRavenDynamics/RuneRavenEJSTemplates.git"
     }
 }
