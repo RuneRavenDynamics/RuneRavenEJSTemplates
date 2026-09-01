@@ -1,0 +1,325 @@
+<!-- #membership-tab-pane ... -->
+
+
+<style>
+    .price-old { text-decoration: line-through; opacity: .6; font-weight: 500; }
+    .price-new { font-weight: 700; }
+    .price-save { color: var(--bs-success); font-size: .85rem; }
+</style>
+
+<div class="h-100 container my-3">
+  <div class="card shadow">
+    <div class="card-header text-white">
+      <!--<h3 class="mb-0">Membership</h3>-->
+    </div>
+    <div class="card-body">
+      <div class="row g-4">
+
+        <!-- Memberships(Subscriptions) -->
+        <div class="col-lg-12">
+          <div class="card shadow-sm h-100">
+            <div class="card-header d-flex align-items-start justify-content-between overflow-auto">
+                <div class="d-flex align-items-start justify-content-around flex-column flex-lg-row gap-3 w-25">
+                    <h5 class="mb-0">Memberships</h5>
+                    <div id="subscription-count" class="badge text-bg-secondary">0</div>
+                </div>
+              <button class="btn btn-sm btn-primary subscription-plans-btn" >Membership Options</button>
+            </div>
+            <div class="card-body">
+              <div id="subscription-list" class="row g-3 overflow-auto">
+                <!-- Filled by renderSubscriptions(subscriptions) -->
+              </div>
+              <!-- Empty state -->
+              <div id="subscription-empty" class="text-muted text-center py-4 d-none">
+                No memberships available.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div> <!-- /row -->
+    </div>
+  </div>
+</div>
+
+<script type="module">
+    import { api } from "https://cdn.runeravendynamics.com/clientapi/latest/api.bundle.js";
+
+    await api.initialize();
+
+    async function reloadSubscriptions() {
+        let customer = await api.graph.getNode(api.tools.A.info.user, "siblings", { type: "customer" });
+
+        let stripeaccount = await api.graph.getNode(api.tools.A.info.business, "children", { type: "stripeaccount" });
+
+        let subscriptionList = await api.graph.elements.createListElement({
+            id: "subscription-list-element",
+            settings: {
+                title: 'Subscriptions',
+                keys: ['name', 'subscription_state.status', 'subscription_options.owner', 'date_created'],
+                scrollable: true,
+                openOptions: {
+                    content: [
+                        {
+                            id: "display-id",
+                            options: {
+                                element: "display",
+                                properties: {
+                                    "subscription": {
+                                        element: "subscriptiondisplay",
+                                        settings: {
+                                            titleSettings: {
+                                                show: false
+                                            },
+                                            objectSettings: {
+                                                subscriptionSettings: {
+                                                    pricing: {
+                                                        details: false
+                                                    },
+                                                    buttons: {
+                                                        afterCallback: async () => {
+                                                            await api.graph.elements.reloadObjectListElement("subscription-list-element");
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            financeSettings: {
+                                                provider: "stripe",
+                                                provideraccount: stripeaccount,
+                                                customer
+                                            },
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                    ]
+                },
+                editButton: false,
+                deleteButton: false,
+                afterCallback: reloadSubscriptions,
+                pagination: {
+                    enabled: true,
+                    edgeOptions: {
+                        edgeType: 'children',
+                        object: api.app.data.user,
+                        auth: { type: "subscription" },
+                    },
+                    state: {
+                        sortBy: "created_at",
+                        sortDirection: "DESC"
+                    }
+                }
+            }
+        });
+
+        let subscriptionListContainer = document.getElementById('subscription-list');
+        if (subscriptionListContainer) {
+            subscriptionListContainer.innerHTML = '';
+            subscriptionListContainer.appendChild(subscriptionList);
+        }
+    }
+
+    function setupSubscriptionPlanElement() {
+        let subscriptionPlansElement = document.createElement('div');
+        subscriptionPlansElement.classList.add('subscription-plans-container', 'd-flex', 'flex-column', 'gap-3');
+
+        api.tools.BM.createOffcanvas("subscription-plans-offcanvas", "Membership Options", subscriptionPlansElement, 'end', "lg", true, true);
+
+        document.querySelector(".subscription-plans-btn").addEventListener('click', () => {
+            api.tools.BM.toggleOffcanvas("subscription-plans-offcanvas");
+        });
+
+        return subscriptionPlansElement;
+    }
+
+    async function buildCancelPlanConfirmation(subscription) {
+        const modalId = 'confirmCancelModal';
+        const subName = subscription?.info?.name ?? 'this subscription';
+
+        api.tools.BM.createModal({
+            id: modalId,
+            title: 'Cancel Subscription',
+            content: `
+                <div class="p-3">
+                    <p class="mb-2">Are you sure you want to cancel <strong>${escapeHtml(subName)}</strong>?</p>
+                    <div class="text-muted small">This stops future billing and may end access immediately.</div>
+                </div>
+            `,
+            buttons: `
+                <button class="btn btn-sm btn-danger confirm-cancel-yes">Yes, cancel</button>
+                <button class="btn btn-sm btn-outline-secondary confirm-cancel-no">No</button>
+            `
+        });
+
+        api.tools.BM.toggleModal(modalId);
+
+        const modalEl = document.getElementById(modalId);
+        if (!modalEl) return;
+
+        const yesBtn = modalEl.querySelector('.confirm-cancel-yes');
+        const noBtn = modalEl.querySelector('.confirm-cancel-no');
+
+        noBtn?.addEventListener('click', () => api.tools.BM.toggleModal(modalId));
+
+        yesBtn?.addEventListener('click', async () => {
+            api.tools.LM.load(true);
+            yesBtn.disabled = true;
+            try {
+                await api.graph.callObjectMethod(subscription, "setStatus", { status: "CANCELLED" });
+                await reloadSubscriptions();
+                api.tools.BM.toggleModal(modalId);
+            } catch (err) {
+                console.error('Cancel failed', err);
+                yesBtn.disabled = false;
+            }
+            api.tools.LM.load(false);
+        });
+    }
+
+    async function buildServiceOptionsElement(service) {
+        let customer = await api.graph.getNode(api.tools.A.info.user, "siblings", { type: "customer" });
+
+        let stripeaccount = await api.graph.getNode(api.tools.A.info.business, "children", { type: "stripeaccount" });
+        
+        let serviceElement = await api.graph.elements.element({
+            object: service,
+            element: "object",
+            id: `${service.info.uoid}-element`,
+            content: {
+                id: "service-details",
+                options: {
+                    element: "display",
+                    properties: {
+                        info: {
+                            element: {
+                                element: 'servicedisplay',
+                                settings: {
+                                    contentSettings: {
+                                        element: "preview"
+                                    },
+                                    objectSettings: {
+                                        serviceSettings: {
+
+                                        }
+                                    },
+                                    financeSettings: {
+                                        provider: "stripe",
+                                        provideraccount: stripeaccount,
+                                        customer
+                                    },
+                                    checkoutSettings: {
+                                        callback: async (checkoutOptions) => {
+                                            api.tools.LM.load(true);
+
+                                            let subscriptionPlan = checkoutOptions.checkout.object;
+                                            let variation = checkoutOptions.checkout.variation;
+                                            let owner = checkoutOptions.checkout.owner;
+                                            let paymentMethod = checkoutOptions.checkout.paymentmethod.payment_method_id;
+
+                                            if (!owner) {
+                                                api.tools.LM.load(false);
+                                                api.tools.FLM.warn("Must provide name of grantee for membership!", 5000);
+                                                return;
+                                            };
+
+                                            if (!paymentMethod) {
+                                                api.tools.LM.load(false);
+                                                api.tools.FLM.warn("Must provide Payment Method for membership!", 5000);
+                                                return;
+                                            }
+
+                                            let newSubscriptionInfo = {
+                                                type: "subscription",
+                                                name: `${subscriptionPlan.info.name}-${variation.title}`,
+                                                description: `${subscriptionPlan.info.description} This is the ${variation.title} variant of this subscription.`,
+                                                subscription_options: {
+                                                    owner: owner,
+                                                    provider: {
+                                                        type: "stripeaccount",
+                                                        id: stripeaccount.info?.id,
+                                                        connection: {
+                                                            type: "business",
+                                                            id: api.tools.A.info.business?.info?.id,
+                                                            relation: "children"
+                                                        }
+                                                    },
+                                                    payment_method: {
+                                                        source: paymentMethod,
+                                                        customerId: customer?.info?.third_party?.stripe?.id,
+                                                    },
+                                                },
+                                                subscription_settings: {
+                                                    type: variation?.settings?.type || subscriptionPlan.info.subscription_settings.type,
+                                                    plan: {
+                                                        id: subscriptionPlan.info.id,
+                                                        type: "subscriptionPlan",
+                                                        connection: {},
+                                                        options: {
+                                                            variation: checkoutOptions.checkout.variationId
+                                                        }
+                                                    },
+                                                    pricing: variation?.settings?.pricing || subscriptionPlan.info.subscription_settings.pricing,
+                                                    schedule: variation?.settings?.schedule || subscriptionPlan.info.subscription_settings.schedule,
+                                                    charge: variation?.settings?.charge || subscriptionPlan.info.subscription_settings.charge,
+                                                    retries: variation?.settings?.retries || subscriptionPlan.info.subscription_settings.retries,
+                                                    email: variation?.settings?.email || subscriptionPlan.info.subscription_settings.email,
+                                                    access: subscriptionPlan.info.subscription_settings.access
+                                                },
+                                            };
+
+                                            console.log("Creating new Stripe Subscription: ", newSubscriptionInfo);
+
+                                            api.tools.RM.setHost(window.location.hostname);
+                                            let result = await api.tools.RM.send("account/create-subscription", "POST", {
+                                                subscription: newSubscriptionInfo
+                                            });
+
+                                            console.log("Result: ", result);
+
+                                            let message;
+                                            if (result.subscription && result.subscription?.info?.subscription_state?.billing?.last_payment_result) {
+                                                if (result.subscription?.info?.subscription_state?.billing?.last_payment_result.ok) {
+                                                    message = "Subscription Created & Charged Successfully!";
+                                                } else {
+                                                    message = result.subscription?.info?.subscription_state?.billing?.last_payment_result?.message || "AN UNKNOWN ERROR HAS OCCURED, TRY AGAIN OR CONTACT SUPPORT..";
+                                                }
+                                            } else {
+                                                message = "AN UNKNOWN ERROR HAS OCCURED, TRY AGAIN OR CONTACT SUPPORT..";
+                                            }
+
+                                            api.tools.FLM.info(message, 6000);
+
+                                            await reloadSubscriptions();
+
+                                            api.tools.LM.load(false);
+                                        }
+                                    }
+                                }
+                            },
+                        }
+                    }
+                }
+            },
+            classes: "w-100"
+        })
+        
+        return serviceElement;
+    }
+
+    function escapeHtml(v) {
+        return v;
+    }
+
+    let SPE = setupSubscriptionPlanElement();
+
+    let services = await api.graph.getNodes(api.tools.A.info.business, "children", {type: "service"});
+    services = services?.objects || services || []
+
+    for (let s of services) {
+        let serviceElement = await buildServiceOptionsElement(s);
+        SPE.appendChild(serviceElement);
+    }
+
+    
+    await reloadSubscriptions();
+</script>

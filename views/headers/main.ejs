@@ -1,0 +1,121 @@
+
+
+
+
+
+
+
+
+
+<style>
+    
+    .pageHeader {
+        position: fixed;
+        top: 0;
+        width: 100%;
+        max-width: 100%;
+        z-index: 100;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        #accounts-dropdown-container {
+            position: absolute;
+            top: 3%;
+            right: 1%;
+        }
+    }
+</style>
+
+
+
+<div class="container pageHeader">
+    <header class="d-flex flex-wrap justify-content-between py-3 mb-4 border-bottom w-75 mx-auto">
+        <div class="d-flex flex-lg-row flex-sm-column justify-content-start align-items-center">
+
+            <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-auto link-body-emphasis text-decoration-none mw-50">
+                <% if (business.info.business_options?.logo?.url) { 
+                    // 1) Extract extension
+                    const logoUrl = business.info.business_options.logo.url;
+                    const extension = logoUrl.split('.').pop().toLowerCase();
+                    const isSvg = (extension === 'svg'); 
+                %>
+                    <% if (isSvg) { %>
+                        <!-- Render SVG as <object> for better vector scaling -->
+                        <object 
+                            data="<%= logoUrl %>" 
+                            type="image/svg+xml" 
+                            width="40" 
+                            height="40" 
+                            class="d-inline-block bi me-2"
+                            style="border-radius: 25%;"
+                        >
+                        <img src="<%= logoUrl %>" alt="Logo" width="40" height="40">
+                        </object>
+                    <% } else { %>
+                        <img 
+                        src="<%= logoUrl %>" 
+                        alt="Logo" 
+                        width="40" 
+                        height="40" 
+                        class="d-inline-block bi me-2"
+                        style="border-radius: 25%;"
+                        >
+                    <% } %>
+                <% } %>
+                <span class="fs-5"><%= business.info.name %></span>
+            </a>
+            <!-- Optional breadcrumb -->
+            <% if (page.info.page_settings.content.navigation?.breadcrumbs) { 
+                // Convert object to array
+                let crumbs = page.info.page_settings.content.navigation.breadcrumbs;
+                %>
+
+                <nav class="ms-3 me-auto d-none d-lg-block" aria-label="breadcrumb">
+                <ol class="breadcrumb m-0">
+                    <% let pageURL = data.url %>
+                    <% for (let breadcrumb of crumbs) { %>
+                    <% if (breadcrumb.url === pageURL) { %>
+                        <li class="breadcrumb-item active" aria-current="page">
+                        <%= breadcrumb.text %>
+                        </li>
+                    <% } else { %>
+                        <li class="breadcrumb-item">
+                        <a href="<%= breadcrumb.url %>"><%= breadcrumb.text %></a>
+                        </li>
+                    <% } %>
+                    <% } %>
+                </ol>
+                </nav>
+
+            <% } %>
+        </div>
+
+        <%- include('../navigation/main.ejs') %>
+
+        <% if (page.info.page_options.accounts) { %>
+            <%- include('../navigation/accounts.ejs') %>
+        <% } %>
+    </header>
+</div>
+
+<script type="module">
+    import { api } from "https://cdn.runeravendynamics.com/clientapi/latest/api.bundle.js";
+
+    await api.initialize();
+    let header = document.querySelector('.pageHeader');
+    api.tools.AM.setAnimationEvent('scrollTop', function() {
+        api.tools.AM.gsap.to(header, {
+            y: "0%",
+            duration: 0.7,
+            ease: "power2.out",
+        });
+    });
+    api.tools.AM.setAnimationEvent('scrollDown', function() {
+        api.tools.AM.gsap.to(header, {
+            y: "-100%",
+            duration: 0.7,
+            ease: "power2.out",
+        });
+    });
+</script>

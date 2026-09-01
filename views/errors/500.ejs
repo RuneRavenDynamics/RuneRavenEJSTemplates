@@ -1,0 +1,10 @@
+<div class="container py-5">
+  <div class="text-center">
+    <h1 class="display-5 fw-bold">Something went wrong</h1>
+    <p class="lead mb-4"><%= message %></p>
+    <% if (error) { %>
+      <pre class="text-start bg-dark p-3 rounded text-white" style="white-space:pre-wrap;"><%= error.stack %></pre>
+    <% } %>
+    <a class="btn btn-primary" href="/">Go home</a>
+  </div>
+</div>

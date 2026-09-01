@@ -1,0 +1,13 @@
+
+
+
+
+
+
+
+
+
+<section class="vw-100 mb-2" id="<%= elementId %>" style="<%= formatElementStyles(element.styles || []) %>" <%= typeof scrollElement !== 'undefined' && scrollElement ? 'data-scroll-section' : '' %>>
+    <%- include('../../display/featured', { content: elementData.featured }) %>
+
+</section>

@@ -1,0 +1,179 @@
+
+
+
+
+
+
+
+
+
+<style>
+
+    .scale-nav-menu {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+    .navigation-menu {
+        position: absolute;
+        top: 25%;
+        right: 5%;
+        height: 50%;
+    }
+
+    .navigation-link {
+        font-size: 1.5em;
+        position: relative;
+        color: white;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block; /* Needed to properly position the pseudo-element */
+        overflow: hidden; /* Ensures the pseudo-element is clipped to the link's dimensions */
+        transform: scale(1); /* Default scale */
+        transition: color 0.3s ease, transform 0.3s ease; /* Smooth transition for color and transform */
+    }
+
+    .navigation-link::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 0%; /* Start with no underline */
+        height: 2px; /* Thickness of the underline */
+        background-color: #a7aeb3; /* Color of the underline */
+        transition: width 0.3s ease; /* Smooth transition for the underline */
+    }
+
+    .navigation-link:hover {
+        color: #a7aeb3;
+        transform: scale(1.1);
+    }
+
+    .navigation-link:hover::after {
+        width: 100%; /* Full width underline on hover */
+    }
+
+    #pageContent.pageContent.minimized {
+        transform: scale(.7);
+        transform-origin: center left;
+        transition: all 2s ease;
+    }
+    
+    #pageContent {
+        transform-origin: center left;
+    	transition: all 2s ease;
+    }
+    
+    @media (max-width: 768px) {
+        .navigation-link {
+            font-size: 1.25em;
+        }
+    }
+
+
+</style>
+
+<div class="scale-nav-menu">
+
+    <header class="navbar navbar-expand-lg navbar-light pageHeader">
+        <div class="container-fluid mx-auto justify-content-around">
+        <!-- Logo / Brand -->
+        <a href="/" class="navbar-brand d-flex align-items-center me-auto">
+            <% if (business.info.business_options?.logo?.url) { 
+                const logoUrl = business.info.business_options.logo.url;
+                const extension = logoUrl.split('.').pop().toLowerCase();
+                const isSvg = (extension === 'svg'); 
+            %>
+            <% if (isSvg) { %>
+                <!-- Render SVG as <object> for better vector scaling -->
+                <object 
+                data="<%= logoUrl %>" 
+                type="image/svg+xml" 
+                width="40" 
+                height="40" 
+                class="d-inline-block bi me-2"
+                style="border-radius: 25%;"
+                >
+                <img src="<%= logoUrl %>" alt="Logo" width="40" height="40">
+                </object>
+            <% } else { %>
+                <img 
+                src="<%= logoUrl %>" 
+                alt="Logo" 
+                width="40" 
+                height="40" 
+                class="d-inline-block bi me-2"
+                style="border-radius: 25%;"
+                >
+            <% } %>
+            <% } %>
+            <span class="fs-5"><%= business.info.name %></span>
+        </a>
+        
+    
+        <!-- Optional breadcrumb -->
+      <% if (page.info.page_settings.content.navigation?.breadcrumbs) { 
+          // Convert object to array
+          let crumbs = page.info.page_settings.content.navigation.breadcrumbs;
+        %>
+
+        <nav class="ms-3 me-auto d-none d-lg-block" aria-label="breadcrumb">
+          <ol class="breadcrumb m-0">
+            <% let pageURL = data.url %>
+            <% for (let breadcrumb of crumbs) { %>
+              <% if (breadcrumb.url === pageURL) { %>
+                <li class="breadcrumb-item active" aria-current="page">
+                  <%= breadcrumb.text %>
+                </li>
+              <% } else { %>
+                <li class="breadcrumb-item">
+                  <a href="<%= breadcrumb.url %>"><%= breadcrumb.text %></a>
+                </li>
+              <% } %>
+            <% } %>
+          </ol>
+        </nav>
+
+      <% } %>
+
+        </div>
+    </header>
+
+    <%- include('../elements/icons/hamburgerCurl.ejs') %>
+
+    <% if (page.info.page_settings.content.header.background && page.info.page_settings.content.background.view) { %>
+        <%- include(`../backgrounds/${page.info.content.header.background.view}`); %>
+    <% } %>
+  
+    <% if (page.info.page_options.accounts) { %>
+        <%- include('../navigation/accounts.ejs') %>
+    <% } %>
+    
+    <%- include('../navigation/scaleNav.ejs') %>
+
+</div>
+
+<script>
+
+document.addEventListener('DOMContentLoaded', () => {
+    scaleNavMenu();
+});
+
+function scaleNavMenu() {
+    const menuButton = document.querySelector('.hamburger').querySelector('input');
+    const page = document.querySelector('#pageContent');
+    menuButton.addEventListener('change', function() {
+        if (menuButton.checked) {
+            console.log('Nav Menu Active');
+            page.classList.add('minimized');
+        } else {
+            console.log('Nav Menu Inactive');
+            page.classList.remove('minimized');
+        }
+    })
+}
+
+</script>

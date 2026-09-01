@@ -1,0 +1,39 @@
+
+
+
+
+
+
+
+
+
+<style>
+    .buffer-zone {
+        width: 100vw;
+        height: 500px;
+    }
+</style>
+
+
+<% for (let content of page.info.page_settings.content.body) { %>
+
+    <% if (content.type === 'object') { %>
+
+        <%- include(`../../elements/content/object/element`, {elementId: content.elementId, element: content, elementData: page.data[content.elementId], scrollElement: true}) %>
+
+    <% } else if (content.type === 'objectList') { %>
+
+        <%- include(`../../elements/content/objectList/element`, {elementId: content.elementId, element: content, elementData: page.data[content.elementId], scrollElement: true}) %>
+
+    <% } else if (content.type === 'template') { %>
+
+        <%- include(`../../elements/content/template/${content.template.type}.ejs`, {elementId: content.elementId, element: content, elementData: page.data[content.elementId], scrollElement: true}) %>
+
+    <% } else if (content.type === 'custom') { %>
+
+        <%- include(`../../elements/content/custom/${content.element.type}.ejs`, {elementId: content.elementId, element: content, elementData: page.data[content.elementId], scrollElement: true}) %>
+
+    <% } %>
+
+<% } %>
+<div class="buffer-zone"></div>

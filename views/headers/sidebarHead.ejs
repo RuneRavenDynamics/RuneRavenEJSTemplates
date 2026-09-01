@@ -1,0 +1,153 @@
+<!--  ────────────────────────────────────────────────────────────────────  -->
+<!--  sidebarHead.ejs – fixed logo + burger and an off‑canvas drawer      -->
+<!--  ────────────────────────────────────────────────────────────────────  -->
+<style>
+    /* tiny strip that’s always visible */
+    .sidebarStrip {
+      position: fixed;
+      top: 0; left: auto; right: 0;
+      width: 4rem; height: 4rem;
+      background: transparent;
+      z-index: 1045;
+      display:flex; align-items:center; justify-content:center;
+      border-bottom-right-radius:.5rem;
+    }
+    .sidebarStrip img,
+    .sidebarStrip object { border-radius:50%; }
+  
+    /* off‑canvas customisations */
+    .app-offcanvas {
+      width: 260px;                /* drawer width */
+      background:#111; color:#fff;
+    }
+    /* push body so content doesn’t hide behind the drawer */
+    body.sidebar-open { margin-right:260px; transition:margin .35s ease; }
+  
+    .app-offcanvas .nav-link { color:#fff; }
+    .app-offcanvas .nav-link:hover { color:#0d6efd; }
+
+    /* ── burger animation – from Uiverse.io by JulanDeAlb ─────────────── */
+    .hamburger svg {
+      height: 3em;
+      transition: transform 600ms cubic-bezier(.4,0,.2,1);
+    }
+    .line{
+      fill:none; stroke:#fff; stroke-linecap:round; stroke-linejoin:round;
+      stroke-width:3;
+      transition:stroke-dasharray 600ms cubic-bezier(.4,0,.2,1),
+                 stroke-dashoffset 600ms cubic-bezier(.4,0,.2,1);
+    }
+    .line-top-bottom{ stroke-dasharray:12 63 }
+
+    .navbar-toggler{
+        background:transparent !important;   /* no grey square      */
+        border:none;                         /* no border           */
+        padding:0;                           /* tight bounding box  */
+    }
+    
+    /* when button (not the hidden checkbox) has aria-expanded="true" */
+    button[aria-expanded="true"] svg{ transform:rotate(-45deg) }
+    button[aria-expanded="true"] .line-top-bottom{
+      stroke-dasharray:20 300; stroke-dashoffset:-32.42
+    }
+
+    /* add a dark glow around the burger */
+    .sidebarStrip svg {
+        height: 3em;
+        filter: drop-shadow(0 0 2px rgba(0,0,0,.75))
+                drop-shadow(0 0 4px rgba(0,0,0,.5));
+    }
+
+    /* want it stronger on hover / active? */
+    button:active svg,
+    button:hover  svg {
+        filter: drop-shadow(0 0 3px rgba(0,0,0,.85))
+                drop-shadow(0 0 6px rgba(0,0,0,.6));
+    }
+</style>
+    
+  
+  <!-- ▸ tiny header with burger ----------------------------------------- -->
+  <header class="sidebarStrip navbar navbar-dark">
+    <!-- animated burger ------------------------------------------------ -->
+    <button class="navbar-toggler p-0 border-0"
+            type="button"
+            data-bs-toggle="offcanvas"
+            data-bs-target="#appSidebar"
+            aria-controls="appSidebar"
+            aria-label="Toggle navigation">
+  
+      <svg viewBox="0 0 32 32" width="36" height="36">
+        <path class="line line-top-bottom"
+              d="M27 10 13 10C10.8 10 9 8.2 9 6
+                 9 3.5 10.8 2 13 2 15.2 2 17 3.8 17 6L17 26
+                 C17 28.2 18.8 30 21 30C23.2 30 25 28.2 25 26
+                 C25 23.8 23.2 22 21 22L7 22"></path>
+        <path class="line" d="M7 16 27 16"></path>
+      </svg>
+  
+    </button>
+  </header>
+  
+  
+  <!-- ▸ off‑canvas drawer ------------------------------------------------ -->
+  <div class="offcanvas offcanvas-end app-offcanvas" tabindex="-1" id="appSidebar">
+    <div class="offcanvas-header">
+      <!-- brand -->
+      <a href="/" class="d-flex align-items-center text-white text-decoration-none">
+        <% if (business.info.business_options?.logo?.url) { 
+            const logo = business.info.business_options.logo.url;
+            const ext  = logo.split('.').pop().toLowerCase(); %>
+          <% if (ext === 'svg') { %>
+            <object data="<%= logo %>" type="image/svg+xml" width="32" height="32" class="me-2"></object>
+          <% } else { %>
+            <img src="<%= logo %>" width="32" height="32" class="me-2">
+          <% } %>
+        <% } %>
+        <strong><%= business.info.name %></strong>
+      </a>
+  
+      <button type="button" class="btn-close btn-close-white"
+              data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+  
+    <div class="offcanvas-body d-flex flex-column">
+      <!-- Optional breadcrumb -->
+      <% if (page.info.page_settings.content.navigation?.breadcrumbs) { 
+          // Convert object to array
+          let crumbs = page.info.page_settings.content.navigation.breadcrumbs;
+        %>
+
+        <nav class="ms-3 me-auto d-none d-lg-block" aria-label="breadcrumb">
+          <ol class="breadcrumb m-0">
+            <% let pageURL = data.url %>
+            <% for (let breadcrumb of crumbs) { %>
+              <% if (breadcrumb.url === pageURL) { %>
+                <li class="breadcrumb-item active" aria-current="page">
+                  <%= breadcrumb.text %>
+                </li>
+              <% } else { %>
+                <li class="breadcrumb-item">
+                  <a href="<%= breadcrumb.url %>"><%= breadcrumb.text %></a>
+                </li>
+              <% } %>
+            <% } %>
+          </ol>
+        </nav>
+
+      <% } %>
+      
+      <!-- main navigation links -->
+      <%- include('../navigation/sidebarNav.ejs') %>
+
+    </div>
+  </div>
+  
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const oc = document.getElementById('appSidebar');
+    oc.addEventListener('shown.bs.offcanvas', () => document.body.classList.add('sidebar-open'));
+    oc.addEventListener('hidden.bs.offcanvas', () => document.body.classList.remove('sidebar-open'));
+  });
+  </script>
+  

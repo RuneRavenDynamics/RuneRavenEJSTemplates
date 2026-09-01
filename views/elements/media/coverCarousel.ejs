@@ -1,0 +1,52 @@
+
+
+
+
+
+
+
+
+
+<div id="<%= slideshow.id %>" class="carousel slide mb-6 h-100 w-100 position-relative" data-bs-ride="carousel">
+    <div class="carousel-indicators">
+        <% for (let i = 0; i < Object.values(slideshow.object.media.files).length; i++) { %>
+            <button type="button" data-bs-target="#<%= slideshow.id %>" data-bs-slide-to="<%= i %>" class="<%= i === 0 ? 'active' : '' %>" aria-label="Slide <%= i + 1 %>"></button>
+        <% } %>
+    </div>
+
+    <% let classes = ['text-start', 'text-center', 'text-end']; %>
+
+    <div class="carousel-inner h-100">
+        <% Object.values(slideshow.object.media.files).forEach((media, i) => { %>
+            <div class="carousel-item h-100 <%= i === 0 ? 'active' : '' %>">
+                <img src="<%= media.url %>" class="object-fit-cover w-100 h-100 d-block" alt="<%= media.metadata.description %>">
+                <div class="container h-100">
+                    <div class="carousel-caption d-block align-text-start">
+                        <h2 class="fw-bold fs-1"><%= media.metadata.title || slideshow.title %></h2>
+                        <p class="fw-bold"><%= media.metadata.description || slideshow.message || '' %></p>
+                        <% if (slideshow.object.info.data.links && slideshow.object.info.data.links.length > 0) { %>
+                            <div class="d-flex align-items-center justify-content-around p-5 m-5">
+                                <% slideshow.object.info.data.links.forEach((link, i) => { %>
+                                    <a href="<%= link.url %>" class="btn btn-primary me-2 p-5 fs-3"><%= link.text %></a>
+                                <% }); %>
+                            </div>
+                        <% } else if (media.metadata.link) { %>
+                            <p><a href="<%= media.metadata.link %>" class="btn btn-primary">Learn More</a></p>
+                        <% } else if (slideshow.link) { %>
+                            <p><a href="<%= slideshow.link %>" class="btn btn-primary">Learn More</a></p>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+        <% }); %>
+    </div>
+      
+    <button class="carousel-control-prev" type="button" data-bs-target="#<%= slideshow.id %>" data-bs-slide="prev">
+      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Previous</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#<%= slideshow.id %>" data-bs-slide="next">
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Next</span>
+    </button>
+  </div>

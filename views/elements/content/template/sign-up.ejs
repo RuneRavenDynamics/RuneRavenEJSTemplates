@@ -1,0 +1,16 @@
+
+
+
+
+
+
+
+
+
+<section id="<%= elementId %>" style="<%= formatElementStyles(element.styles || []) %>" <%= typeof scrollElement !== 'undefined' && scrollElement ? 'data-scroll-section' : '' %>>
+    <%- include('../../account/create', {
+        content: {
+            title: element.template.options?.title || null
+        }
+    }) %>
+</section>

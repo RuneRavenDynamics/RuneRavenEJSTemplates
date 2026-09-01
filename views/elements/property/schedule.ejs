@@ -1,0 +1,65 @@
+<%
+const durationStr = formatDuration(content.schedule.duration.period, content.schedule.duration.period_type);
+
+// Extract schedule entries
+let scheduleOptions = content.schedule?.recurrence?.options || {};
+const schedules = scheduleOptions && typeof scheduleOptions === "object"
+  ? Object.entries(scheduleOptions)
+  : [];
+%>
+
+<% if (schedules.length) { %>
+  <div class="d-flex flex-column align-items-start justify-content-start gap-3 gy-4 my-4">
+
+    <h4 class="pb-2 border-bottom w-100"><%= content?.title ? titleCase(content.title) : "Schedules" %></h4>
+
+    <% schedules.forEach(([key, sched]) => {
+         const rule = (sched && sched.rule) || {};
+         let dateOptions = {
+            timeZone: (sched && sched.timezone) || "America/New_York"
+         }
+         const days = formatDays(rule.byday || []);
+         const timeStr = (Number.isInteger(rule.byhour) && Number.isInteger(rule.byminute))
+           ? to12h(rule.byhour, rule.byminute) : null;
+         const freqStr = formatFrequency(rule);
+         const untilStr = rule.until ? formatDate(rule.until, dateOptions) : null;
+         const anchorStr = sched.anchor ? formatDate(sched.anchor, dateOptions) : null;
+         const countStr = (rule.count != null) ? `${rule.count} occurrence${rule.count===1?"":"s"}` : null;
+         const hasExceptions = Array.isArray(sched.exceptions) && sched.exceptions.length;
+    %>
+
+      <div>
+        <div class="card shadow-sm h-100">
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title mb-2"><%= titleCase(key) %></h5>
+
+            <p class="mb-2">
+              <% if (days) { %><strong><%= days %></strong><% } %>
+              <% if (timeStr) { %> at <strong><%= timeStr %></strong><% } %>
+              <% if (durationStr) { %> · <%= durationStr %><% } %>
+            </p>
+
+            <p class="text-muted small mb-2">
+              <%= freqStr %><% if (countStr) { %> · <%= countStr %><% } %>
+              <% if (anchorStr) { %> · starts <%= anchorStr %><% } %>
+              <% if (untilStr) { %> · until <%= untilStr %><% } %>
+              <% if (dateOptions && dateOptions.timeZone) { %> · Timezone - <%= dateOptions.timeZone %><% } %>
+            </p>
+
+            <% if (hasExceptions) { %>
+              <div class="mt-auto">
+                <span class="badge text-bg-warning">Exceptions</span>
+                <ul class="small mt-2 mb-0">
+                  <% sched.exceptions.forEach(ex => { %>
+                    <li><%= formatDate(ex, dateOptions) %></li>
+                  <% }) %>
+                </ul>
+              </div>
+            <% } %>
+          </div>
+        </div>
+      </div>
+
+    <% }); %>
+  </div>
+<% } %>

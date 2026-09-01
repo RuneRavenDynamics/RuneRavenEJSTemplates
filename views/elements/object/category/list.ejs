@@ -1,0 +1,35 @@
+
+
+
+
+
+
+
+
+
+<div class="container-fluid mb-5">
+    <% if (objects?.title) { %>
+        <h4 class="pb-2 border-bottom mb-2"><%= titleCase(objects?.title) %></h4>
+    <% } %>
+    
+    <div class="row">
+        <% for (let category of objects?.objects || objects || []) { %>
+            <% if (!category.info.options.public) { continue; } %>
+            <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
+                <%- include('./preview', { object: category }) %>
+            </div>
+        <% } %>
+    </div>
+
+    <% if (objects?.pagination) { %>
+        <!-- Pagination -->
+        <div class="container-fluid h-auto my-3">
+            <div class="row">
+                <div class="col-12 d-flex justify-content-center">
+                    <%- include('../../utility/pagination.ejs', {pagination: objects.pagination}) %>
+                </div>
+            </div>
+        </div>
+    <% } %>
+</div>
+  

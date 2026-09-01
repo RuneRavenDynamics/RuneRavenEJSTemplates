@@ -1,0 +1,61 @@
+
+<style>
+    #subscriptions-container {
+
+    }
+</style>
+
+<!-- #subscription-tab-pane ... -->
+<div class="h-100 container my-3" id="subscriptions-container">
+  
+</div>
+
+
+<script type="module">
+    import { api } from "https://cdn.runeravendynamics.com/clientapi/latest/api.bundle.js";
+
+    await api.initialize();
+
+
+    async function reloadSubscriptions() {
+        let subscriptions = await api.graph.getAllNodes(api.tools.A.info.business, "children", {type: "subscription"}, {
+            sortBy: "created_at",
+            sortDirection: "DESC"
+        });
+        subscriptions = subscriptions?.objects || subscriptions || [];
+
+        console.log("Returned Subscriptions: ", subscriptions);
+
+        let subscriptionList = await api.graph.elements.createListElement({
+            objects: subscriptions,
+            settings: {
+                title: 'Subscriptions',
+                keys: ['name', 'subscription_state.status', 'subscription_options.owner', 'date_created'],
+                scrollable: true,
+                openOptions: {
+                    content: [
+                        {
+                            id: "form",
+                            title: "Info",
+                            options: {
+                                element: "form",
+                                properties: ['name', 'description', 'subscription_state', 'subscription_options', 'subscription_settings']
+                            }
+                        }
+                    ]
+                },
+                editButton: false,
+                afterCallback: reloadSubscriptions
+            }
+        });
+
+        let subscriptionListContainer = document.getElementById('subscriptions-container');
+        if (subscriptionListContainer) {
+            subscriptionListContainer.innerHTML = '';
+            subscriptionListContainer.appendChild(subscriptionList);
+        }
+    }
+
+
+    await reloadSubscriptions();
+</script>

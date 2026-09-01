@@ -1,0 +1,179 @@
+
+
+
+
+
+
+
+
+
+<style>
+
+    #business-service-section {
+      margin-top: 5%;
+    }
+
+    .swiper-media-cube {
+        width: 100%;
+        height: 100%;
+    }
+
+    .swiper-media-cube .swiper-slide {
+        overflow: hidden;
+    }
+
+    .swiper-media-cube .swiper-slide img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;       /* Scale the image to fill the container and crop if necessary */
+        object-position: center; /* Keep the image centered */
+    }
+
+    .swiper-button-next,
+    .swiper-button-prev {
+        color: #007bff;
+    }
+
+    .swiper-pagination-bullet-active {
+        background: #007bff;
+    }
+
+    .fact-chip {
+    background: var(--bs-body-bg);
+    border: 1px solid var(--bs-primary);
+  }
+  .fact-chip i { font-size: 1rem; color: var(--bs-primary); }
+
+</style>
+
+
+<% if (object && object.info) { %>
+    <section class="container mb-5">
+        <div class="row gy-5 my-5">
+            <div class="col-12">
+                <h2 class="text-center fw-bold"><%= object.info.name %></h2>
+            </div>
+        </div>
+        
+        <div class="row gy-4 mb-5 justify-content-center">
+
+            <div class="col-lg-8">
+              <!-- Text content -->
+              <p><%= object.info.description %></p>
+              <p><%= object.info.long_description %></p>
+
+                <% const quickFacts = [
+                  { icon: 'fa-solid fa-layer-group', label: 'Type',     value: object.info.service_settings?.type ? formatHeading(object.info.service_settings.type) : null },
+                  { icon: 'fa-solid fa-tag',      label: 'Base price',  value: formatMoney(object.info.service_settings.pricing.amount, object.info.service_settings.pricing.currency) },
+                  { icon: 'fa-regular fa-clock',  label: 'Duration',    value: formatDuration(object.info.service_settings.schedule.duration.period, object.info.service_settings.schedule.duration.period_type) },
+                  { icon: 'fa-solid fa-rotate',   label: 'Frequency',     value: formatCadence(object.info.service_settings.schedule.recurrence) }
+                ].filter(x => x.value); %>
+
+                <% if (quickFacts.length) { %>
+                  <div class="card shadow-sm border-0 mt-3" aria-label="Service quick facts">
+                    <div class="card-body py-3">
+                      <div class="d-flex flex-wrap justify-content-start gap-2">
+                        <% quickFacts.forEach(f => { %>
+                          <div class="fact-chip d-inline-flex align-items-center gap-2 px-3 py-2 rounded">
+                            <i class="<%= f.icon %>"></i>
+                            <div class="d-flex flex-column gap-2 lh-1">
+                              <small class="text-muted"><%= f.label %></small>
+                              <strong><%= f.value %></strong>
+                            </div>
+                          </div>
+                        <% }) %>
+                      </div>
+                    </div>
+                  </div>
+                <% } %>
+
+                <!-- === CTA (under quick facts, before media) === -->
+                <%
+                  const cta = object?.info?.data?.cta;
+                  const ctaText = (cta && typeof cta.text === 'string' && cta.text.trim()) ? cta.text.trim() : 'Contact Us';
+                  const ctaUrl  = (cta && typeof cta.url  === 'string' && cta.url.trim())  ? cta.url.trim()  : '/contact';
+                  const isExternal = /^https?:\/\//i.test(ctaUrl);
+                %>
+                <div class="mt-3 d-flex align-items-center justify-content-center">
+                  <a
+                    href="<%= ctaUrl %>"
+                    class="btn btn-primary btn-lg"
+                    <% if (isExternal) { %> target="_blank" rel="noopener noreferrer" <% } %>>
+                    <i class="fa-solid fa-paper-plane me-2"></i><%= ctaText %>
+                  </a>
+                </div>
+                <!-- === /CTA === -->
+
+            </div>
+
+            <% for (let c of element?.object?.options?.content || []) { %>
+                <% if (c?.type === 'media') { %>
+
+                    <div class="col-lg-4 mb-4 vh-50">
+                      <!-- Media / Slider -->
+                      <div class="rounded shadow w-100 h-100">
+                        <% 
+                            let slideshowOptions = {
+                                id: `${object.info.uoid}-slideshow`,
+                                type: "swiper-media-cube",
+                                slides: object.media.files,
+                                options: {
+                                    navigation: true,
+                                    pagination: true
+                                }
+                            };
+                        %>
+                        <%- include('../../media/slideshow', { slideshow: slideshowOptions }) %>
+                      </div>
+                    </div>
+
+                <% } else if (c?.type === 'subscription_plans') { %>
+
+                    <% if (Object.keys(object?.objects?.subscriptionPlan || {}).length) { 
+                      let plans = Object.values(object.objects.subscriptionPlan);
+                      %>
+                      <%- include('../subscriptionplan/list', { 
+                        objects: {
+                          title: "Subscription Plans",
+                          objects: plans,
+                        }
+                      }) %>
+                      
+                    <% } %>
+
+                <% } else if (c?.type === 'schedule') { %>
+
+                    <% if (object.info.service_settings.schedule.recurrence.recurring && object.info.service_settings.schedule.recurrence.options) { %>
+                      <%- include('../../property/schedule', { 
+                        content: {
+                          schedule: object.info.service_settings.schedule,
+                          title: `Schedules`
+                        }
+                      }) %>
+                    <% } %>
+                
+                <% } else if (c?.type === 'details') { %>
+              
+                    <% if (object.info.details) { %>
+                      <%- include('../../property/features', { 
+                        content: {
+                          id: `${object.info.uoid}-features`,
+                          type: c?.options?.type || "accordion",
+                          title: c?.options?.title || "Details",
+                          items: Object.values(object.info?.details || {})
+                        }
+                      }) %>
+                    <% } %>
+
+                <% } %>
+
+            <% } %>
+        </div>
+          
+    </section>
+
+
+<% } else { %>
+    <p>Service not found.</p>
+<% } %>
+    

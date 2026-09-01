@@ -1,0 +1,272 @@
+
+
+
+
+
+
+
+
+
+<style>
+    .image-header-text {
+        color: white;
+        text-shadow: 2px 3px black;
+    }
+
+    .feature-icon {
+        width: 4rem;
+        height: 4rem;
+        border-radius: .75rem;
+    }
+
+    .feature-icon-small {
+        width: 3rem;
+        height: 3rem;
+        border-radius: .75rem;
+    }
+
+    .icon-square {
+        width: 3rem;
+        height: 3rem;
+        border-radius: .75rem;
+    }
+</style>
+
+<%
+  const type = content.type || 'columns-icons';
+  const id = content.id || 'featured-section';
+  const title = content.title || '';
+  const subtitle = content.subtitle || '';
+  const message = content.message || '';
+  const items = Array.isArray(content.items) ? content.items : [];
+%>
+
+<% if (type === 'columns-icons') { %>
+  <!-- Columns with icons -->
+  <section class="container px-4 py-5" id="<%= id %>">
+    <% if (title) { %>
+      <h4 class="pb-2 border-bottom"><%= title %></h4>
+    <% } %>
+
+    <div class="row g-4 py-5 row-cols-1 row-cols-lg-3">
+      <% items.forEach(function(item) { %>
+        <div class="feature col">
+          <div class="feature-icon d-inline-flex align-items-center justify-content-center text-bg-primary bg-gradient fs-2 mb-3">
+            <% if (item.icon) { %>
+              <i class="<%= item.icon %>" aria-hidden="true"></i>
+            <% } %>
+          </div>
+          <h3 class="fs-2 text-body-emphasis"><%= item?.title || item?.name || 'Featured title' %></h3>
+          <p><%= item?.text || item?.message || item?.description || '' %></p>
+          <% if (item.link) { %>
+            <a href="<%= item.link?.url || item.link?.href %>" class="icon-link">
+              <%= item.link?.text || 'Call to action' %>
+              <i class="<%= item.link?.icon || 'fa-solid fa-chevron-right' %>" aria-hidden="true"></i>
+            </a>
+          <% } %>
+        </div>
+      <% }); %>
+    </div>
+  </section>
+
+<% } else if (type === 'hanging-icons') { %>
+  <!-- Hanging icons -->
+  <section class="container px-4 py-5" id="<%= id %>">
+    <% if (title) { %>
+      <h4 class="pb-2 border-bottom"><%= title %></h4>
+    <% } %>
+
+    <div class="row g-4 py-5 row-cols-1 row-cols-lg-3">
+      <% items.forEach(function(item) { %>
+        <div class="col d-flex align-items-start">
+          <div class="icon-square text-body-emphasis bg-body-secondary d-inline-flex align-items-center justify-content-center fs-4 flex-shrink-0 me-3">
+            <% if (item.icon) { %>
+              <i class="<%= item.icon %>" aria-hidden="true"></i>
+            <% } %>
+          </div>
+          <div>
+            <h3 class="fs-2 text-body-emphasis"><%= item?.title || item?.name || 'Featured title' %></h3>
+            <p><%= item?.text || item?.message || item?.description || '' %></p>
+            <% if (item?.link) { %>
+              <a href="<%= item.link?.url || item.link?.href %>" class="<%= item.link?.btnClass || 'btn btn-primary' %>">
+                <%= item.link?.text || 'Primary button' %>
+              </a>
+            <% } %>
+          </div>
+        </div>
+      <% }); %>
+    </div>
+  </section>
+
+<% } else if (type === 'icon-grid') { %>
+  <!-- Icon grid -->
+  <section class="container px-4 py-5" id="<%= id %>">
+    <% if (title) { %>
+      <h4 class="pb-2 border-bottom"><%= title %></h4>
+    <% } %>
+
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4 py-5">
+      <% items.forEach(function(item) { %>
+        <div class="col d-flex align-items-start">
+          <% if (item.icon) { %>
+            <i class="<%= item.icon %> text-body-secondary flex-shrink-0 me-3" aria-hidden="true"></i>
+          <% } %>
+          <div>
+            <h3 class="fw-bold mb-0 fs-4 text-body-emphasis"><%= item?.title || item?.name || 'Featured title' %></h3>
+            <p><%= item?.text || item?.message || item?.description || '' %></p>
+          </div>
+        </div>
+      <% }); %>
+    </div>
+  </section>
+
+<% } else if (type === 'title-with-features') { %>
+  <!-- Features with title (left panel + grid) -->
+  <section class="container px-4 py-5" id="<%= id %>">
+    <% if (title) { %>
+      <h4 class="pb-2 border-bottom"><%= title %></h4>
+    <% } %>
+
+    <div class="row row-cols-1 row-cols-md-2 align-items-md-center g-5 py-5">
+      <div class="col d-flex flex-column align-items-start gap-2">
+        <h4 class="fw-bold text-body-emphasis"><%= subtitle || title || 'Features' %></h4>
+        <% if (message) { %>
+          <p class="text-body-secondary"><%= message %></p>
+        <% } %>
+        <% if (content.link && content.link?.url) { %>
+          <a href="<%= content.link.url %>" class="btn btn-primary btn-lg">
+            <%= content.link.text || 'Primary button' %>
+          </a>
+        <% } %>
+      </div>
+
+      <div class="col">
+        <div class="row row-cols-1 row-cols-sm-2 g-4">
+          <% items.forEach(function(item) { %>
+            <div class="col d-flex flex-column gap-2">
+              <div class="feature-icon-small d-inline-flex align-items-center justify-content-center text-bg-primary bg-gradient fs-4 rounded-3">
+                <% if (item.icon) { %>
+                  <i class="<%= item.icon %>" aria-hidden="true"></i>
+                <% } %>
+              </div>
+              <h4 class="fw-semibold mb-0 text-body-emphasis"><%= item?.title || item?.name || 'Featured title' %></h4>
+              <p class="text-body-secondary"><%= item?.text || item?.message || item?.description || '' %></p>
+            </div>
+          <% }); %>
+        </div>
+      </div>
+    </div>
+  </section>
+
+<% } else if (type === 'custom-cards') { %>
+  <!-- Custom cards -->
+  <section class="container px-4 py-5" id="<%= id %>">
+    <% if (title) { %>
+      <h4 class="pb-2 border-bottom"><%= title %></h4>
+    <% } %>
+
+    <div class="row row-cols-1 row-cols-lg-3 align-items-stretch g-4 py-5">
+
+      <% items.forEach(function(item) { %>
+        <div class="col">
+
+          <% if (item?.link && item.link?.url) { %>
+            <!-- Make whole card clickable -->
+            <a href="<%= item.link.url %>" class="text-decoration-none text-reset">
+          <% } %>
+
+            <div class="card card-cover h-100 overflow-hidden text-bg-dark rounded-4 shadow-lg"
+                style="<% if (item.media) { %>
+                  background-image: url('<%= item.media %>');
+                  background-size: cover;
+                  background-position: center;
+                  background-repeat: no-repeat;
+                <% } %>">
+
+              <div class="d-flex flex-column h-100 p-5 pb-3 text-shadow-1">
+
+                <h3 class="pt-5 mt-5 mb-4 display-6 lh-1 fw-bold image-header-text">
+                  <%= item?.title || item?.name || 'Featured title' %>
+                </h3>
+
+                <ul class="d-flex list-unstyled mt-auto">
+                    <% if (item?.icon || item?.logo) { %>
+                        <li class="me-auto">
+                            <% if (item?.icon) { %>
+                                <i class="<%= item.icon %>"></i>
+                            <% } else if (item?.logo) { %>
+                                <img src="<%= item.logo %>"
+                                    alt="<%= item?.title || item?.name || 'Icon' %>"
+                                    width="32" height="32"
+                                    class="rounded-circle border border-white">
+                            <% } %>
+                        </li>
+                    <% } %>
+
+                    <% if (item?.details && item.details.length > 0) { %>
+                        <% for (let [index, d] of item.details.entries()) { %>
+                            <li class="d-flex align-items-center me-3">
+                                <i class="<%= d.icon %> <%= (index == (item.details.length - 1)) ? "me-2" : "" %>"></i>
+                                <small><%= d.text %></small>
+                            </li>
+                        <% } %>
+                    <% } %>
+
+              </div>
+            </div>
+
+          <% if (item?.link && item.link?.url) { %>
+            </a>
+          <% } %>
+
+        </div>
+      <% }); %>
+
+    </div>
+  </section>
+<% } else if (type === 'accordion') { %>
+    <!-- Accordion -->
+  <section class="container px-4 py-5" id="<%= id %>">
+    <% if (title) { %>
+      <h4 class="pb-2 border-bottom"><%= title %></h4>
+    <% } %>
+
+    <div class="accordion my-5" id="<%= id %>-accordion">
+        <% for (const [index, item] of Object.entries(items)) { %>
+            <div class="accordion-item mb-3">
+                <h4 class="accordion-header" id="heading-<%= `${id}-${index}` %>">
+                <button class="accordion-button <%= index !== 0 ? 'collapsed' : '' %>" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-<%= `${id}-${index}` %>" aria-expanded="<%= index === 0 ? 'true' : 'false' %>" aria-controls="collapse-<%= `${id}-${index}` %>">
+                    <i class="<%= item.icon %> me-2"></i> <%= item?.title || item.name %>
+                </button>
+                </h4>
+                <div id="collapse-<%= `${id}-${index}` %>" class="accordion-collapse collapse <%= index === 0 ? 'show' : '' %>" aria-labelledby="heading-<%= `${id}-${index}` %>" data-bs-parent="#objectDetailsAccordion">
+                <div class="accordion-body">
+                    <p><%= item?.message || item.description %></p>
+
+                    <% const mediaKeys = item?.media ? Object.keys(item?.media) : []; %>
+                    <% if (mediaKeys.length === 1) { %>
+                    <div class="text-center">
+                        <img src="<%= item.media[mediaKeys[0]].url %>" alt="<%= mediaKeys[0] %>" class="img-fluid rounded shadow mt-3" loading="lazy">
+                    </div>
+                    <% } else if (mediaKeys.length > 1) { %>
+                    <div class="swiper swiper-media-cube mt-3">
+                        <div class="swiper-wrapper">
+                        <% for (const mediaKey of mediaKeys) { %>
+                            <div class="swiper-slide">
+                            <img src="<%= item.media[mediaKey].url %>" alt="<%= mediaKey %>" class="img-fluid rounded" loading="lazy">
+                            <div class="swiper-lazy-preloader"></div>
+                            </div>
+                        <% } %>
+                        </div>
+                        <div class="swiper-button-next"></div>
+                        <div class="swiper-button-prev"></div>
+                        <div class="swiper-pagination"></div>
+                    </div>
+                    <% } %>
+                </div>
+                </div>
+            </div>
+        <% } %>
+    </div>
+  </section>
+<% } %>

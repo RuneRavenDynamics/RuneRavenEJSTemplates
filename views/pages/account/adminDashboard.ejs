@@ -1,0 +1,192 @@
+
+
+
+
+
+
+
+
+
+<style>
+    /* Base Dashboard Styles */
+
+    .dashboard {
+        height: 100vh;
+        padding: 0;
+        position: relative;
+    }
+
+    .dashboard-nav-bar {
+        background: linear-gradient(to right, var(--bs-primary), var(--bs-secondary));
+    }
+
+    .dashboard-nav-bar .nav-link {
+        color: white;
+    }
+    
+    .dashboard-tab-content {
+        height: 90%;
+        position: relative;
+    }
+
+    table caption {
+        font-size: 1.5em;
+        color: white;
+    }
+
+    .pageContent-content {
+        min-height: 100vh;
+        height: 100vh;
+    }
+</style>
+
+<div class="container-fluid dashboard" data-scroll-section>
+    <nav class="navbar navbar-expand-lg dashboard-nav-bar"  data-scroll data-scroll-sticky data-scroll-target=".dashboard"> 
+        <div class="container-fluid justify-content-start">
+            <a class="navbar-brand" href="#">
+                <img src="<%= business.info.logo %>" alt="Logo" width="40" height="40" class="d-inline-block align-text-top">
+                <%= business.info.name %> Admin Dashboard
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="nav nav-pills nav-fill" id="myTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home-tab-pane" type="button" role="tab" aria-controls="home-tab-pane" aria-selected="true">HOME</button>
+                    </li>
+                    <% if (page?.info?.page_settings?.content?.adminDashboard.sections) { %>
+                        <% Object.entries(page.info.page_settings.content.adminDashboard.sections).forEach(([id, section]) => { %>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" style="text-transform: uppercase;" id="<%= id %>-tab" data-bs-toggle="tab" data-bs-target="#<%= id %>-tab-pane" type="button" role="tab" aria-controls="<%= id %>-tab-pane" aria-selected="false"><%= section.title %></button>
+                            </li>
+                        <% }) %>
+                    <% } %>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="account-tab" data-bs-toggle="tab" data-bs-target="#account-tab-pane" type="button" role="tab" aria-controls="account-tab-pane" aria-selected="false" >ACCOUNT</button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="tab-content p-3 dashboard-tab-content" id="myTabContent" data-scroll data-scroll-sticky data-scroll-target=".dashboard">
+
+        <div class="h-100 tab-pane fade show active" id="home-tab-pane" role="tabpanel" aria-labelledby="home-tab" tabindex="0">
+            <%- include("./sections/notification"); %>
+        </div>
+
+        <% if (page?.info?.page_settings?.content?.adminDashboard?.sections) { %>
+            <% Object.entries(page.info.page_settings.content.adminDashboard.sections).forEach(([id, section]) => { %>
+                <div class="h-100 tab-pane fade" id="<%= id %>-tab-pane" role="tabpanel" aria-labelledby="<%= id %>-tab" tabindex="0">
+                    <% if (section.template) { %>
+                        <%- include(`./sections/${section.template}`); %>
+                    <% } %>
+                </div>
+            <% }) %>
+        <% } %>
+        
+        <div class="h-100 tab-pane fade" id="account-tab-pane" role="tabpanel" aria-labelledby="account-tab" tabindex="0">
+            <%- include("./sections/account"); %>
+        </div>
+
+    </div>
+</div>
+
+<script type="module">
+    import { api } from "https://cdn.runeravendynamics.com/clientapi/latest/api.bundle.js";
+
+    await api.initialize();
+
+    class Dashboard {
+        constructor() {
+            this.initialize();
+        }
+
+        async initialize() {
+            //this.setupDOM();
+            //await this.setupEvents();
+            api.tools.AM.refreshScroll();
+        }
+
+        setupDOM() {
+            this.nav = document.querySelector('.dashboard-nav-bar');
+            this.leadElements = document.querySelectorAll('.lead-row');
+            this.leadDetails = document.getElementById('leadDetails');
+            this.leads =  <%- JSON.stringify(leads) %>;
+        }
+
+        async setupEvents() {
+            document.addEventListener('shown.bs.tab', () => {
+                api.tools.AM.refreshScroll();
+            });
+
+            this.leadElements.forEach(lead => {
+                lead.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const id = lead.dataset.leadId;
+                    const delBtn = e.target.closest('.remove-lead');
+                    if (delBtn) {
+                        this.deleteLead(id, lead);
+                        return;                       // ⬅ stop here – don’t show details
+                    }
+
+                    /* otherwise show details */
+                    this.showLeadDetails(id);
+                });
+            });
+        }
+
+        /* 3. delete handler  ────────────────────────────────────────────*/
+        async deleteLead (id, rowEl) {
+            if (!confirm('Delete this lead?')) return;    // optional confirm
+
+            try {
+                await api.tools.OM.deleteObject(id, 'lead'); // ← your API call
+                /* remove from UI & local lookup */
+                rowEl.remove();
+                delete this.leads[id];
+                this.leadDetails.innerHTML =
+                    '<p class="text-secondary m-auto">Select a lead to view details</p>';
+            } catch (err) {
+                console.error('Failed to delete lead', err);
+                alert('Could not delete lead – check console');
+            }
+        }
+
+        async showLeadDetails(leadId) {
+            let lead = this.leads[leadId];
+
+            if (!lead) {
+                this.leadDetails.innerHTML =
+                '<p class="text-secondary m-auto">Select a lead to view details</p>';
+                return;
+            }
+
+            // helper to print a row only if the value exists
+            const row = (label, value) =>
+                value ? `<tr><th class="text-nowrap">${label}</th><td>${value}</td></tr>` : '';
+
+            // convert line‑breaks in the message, if any
+            const message = (lead.info.message || '').replace(/\n/g,'<br>');
+
+            this.leadDetails.innerHTML = `
+                <div class="container-fluid">
+                <h4 class="mb-3">${lead.info.first_name} ${lead.info.last_name}</h4>
+
+                <table class="table table-sm table-borderless align-middle w-auto">
+                    ${row('Date',       new Date(lead.info.date_created).toLocaleString())}
+                    ${row('Lead type',  lead.info.lead_type)}
+                    ${row('E‑mail',     `<a href="mailto:${lead.info.email}">${lead.info.email}</a>`)}
+                    ${row('Phone',      `<a href="tel:${lead.info.phone}">${lead.info.phone}</a>`)}
+                    ${row('Message',    message)}
+                </table>
+            </div>`;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const dashboard = new Dashboard();
+        window.dashboard = dashboard;
+    });
+</script>

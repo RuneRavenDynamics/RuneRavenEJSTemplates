@@ -1,0 +1,47 @@
+<div class="col-lg-12">
+          
+    <!-- Accordion Section -->
+    <% if (content.details && Object.keys(content.details).length > 0) { %>
+    <div class="accordion my-5" id="objectDetailsAccordion">
+        <h4 class="my-5 fw-bold text-center"><%= content?.title || "Details" %></h4>
+
+        <% let detailIndex = 0; %>
+        <% for (const [key, detail] of Object.entries(content.details)) { %>
+        <div class="accordion-item mb-3 parallax-up">
+            <h2 class="accordion-header" id="heading-<%= key %>">
+            <button class="accordion-button <%= detailIndex !== 0 ? 'collapsed' : '' %>" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-<%= key %>" aria-expanded="<%= detailIndex === 0 ? 'true' : 'false' %>" aria-controls="collapse-<%= key %>">
+                <i class="<%= detail.icon %> me-2"></i> <%= detail.name %>
+            </button>
+            </h2>
+            <div id="collapse-<%= key %>" class="accordion-collapse collapse <%= detailIndex === 0 ? 'show' : '' %>" aria-labelledby="heading-<%= key %>" data-bs-parent="#objectDetailsAccordion">
+            <div class="accordion-body">
+                <p><%= detail.description %></p>
+
+                <% const mediaKeys = detail.media ? Object.keys(detail.media) : []; %>
+                <% if (mediaKeys.length === 1) { %>
+                <div class="text-center">
+                    <img src="<%= detail.media[mediaKeys[0]].url %>" alt="<%= mediaKeys[0] %>" class="img-fluid rounded shadow mt-3" loading="lazy">
+                </div>
+                <% } else if (mediaKeys.length > 1) { %>
+                <div class="swiper swiper-media-cube mt-3">
+                    <div class="swiper-wrapper">
+                    <% for (const mediaKey of mediaKeys) { %>
+                        <div class="swiper-slide">
+                        <img src="<%= detail.media[mediaKey].url %>" alt="<%= mediaKey %>" class="img-fluid rounded" loading="lazy">
+                        <div class="swiper-lazy-preloader"></div>
+                        </div>
+                    <% } %>
+                    </div>
+                    <div class="swiper-button-next"></div>
+                    <div class="swiper-button-prev"></div>
+                    <div class="swiper-pagination"></div>
+                </div>
+                <% } %>
+            </div>
+            </div>
+        </div>
+        <% detailIndex++; %>
+        <% } %>
+    </div>
+    <% } %>
+</div>

@@ -1,0 +1,45 @@
+<!-- inside #billing-tab-pane ... -->
+<div class="container my-3">
+  <div class="card shadow">
+    <div class="card-header text-white">
+      <h3 class="mb-0">Billing</h3>
+    </div>
+    <div class="card-body">
+
+    </div>
+  </div>
+</div>
+
+<script type="module">
+    import { api } from "https://cdn.runeravendynamics.com/clientapi/latest/api.bundle.js";
+
+    await api.initialize();
+
+    async function setupBilling() {
+      const billingPane = document.querySelector("#billing-tab-pane .card-body");
+
+      const stripeaccount = await api.graph.getNode(api.tools.A.info.business, "children", { type: "stripeaccount" });
+
+      const customer = await api.graph.getNode(api.tools.A.info.user, "siblings", { type: "customer" });
+
+      if (!stripeaccount) {
+          console.log("No Stripe account found for business.");
+          return;
+      }
+
+      if (!customer?.info?.third_party?.stripe?.id) {
+          console.log("No Stripe customer ID found for user/customer.");
+          return;
+      }
+
+      billingPane.innerHTML = "";
+
+      await api.tools.FM.getStripeCustomerPaymentMethodsElement({
+          parent: billingPane,
+          customer,
+          stripeaccount
+      });
+    }
+
+    await setupBilling();
+</script>

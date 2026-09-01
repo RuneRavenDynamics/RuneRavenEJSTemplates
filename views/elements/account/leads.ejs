@@ -1,0 +1,44 @@
+<div class="row g-0 h-100">
+
+    <!-- ▸ sidebar ------------------------------------------------------- -->
+    <div class="col-auto bg-body-tertiary border-end" style="width:380px;">
+        <div class="bg-dark text-white p-3">
+        <h3 class="m-0">Leads</h3>
+        </div>
+
+        <div class="list-group list-group-flush scrollarea">
+        <% for (const lead of Object.values(leads)) { %>
+            <a  href="#"
+                class="list-group-item list-group-item-action py-3 lh-sm lead-row"
+                data-lead-id="<%= lead.info.id %>">
+            <div class="d-flex w-100 align-items-center justify-content-between">
+                <strong class="mb-1">
+                <%= `${lead.info.first_name} ${lead.info.last_name}` %>
+                </strong>
+
+                <!-- remove button -->
+                <button class="btn btn-sm btn-outline-danger remove-lead"
+                        data-lead-id="<%= lead.info.id %>"
+                        title="Delete lead">
+                &times;
+                </button>
+            </div>
+
+            <small class="text-body-secondary">
+                <%= lead.info.date_created %>
+            </small>
+
+            <div class="small text-truncate" style="max-width:280px;">
+                <%= lead.info.message %>
+            </div>
+            </a>
+        <% } %>
+        </div>
+    </div>
+
+    <!-- ▸ details pane -------------------------------------------------- -->
+    <div class="col bg-dark text-white p-4 d-flex align-items-start"
+            id="leadDetails" style="min-height:100%;">
+        <p class="text-secondary m-auto">Select a lead to view details</p>
+    </div>
+</div>

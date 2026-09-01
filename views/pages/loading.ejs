@@ -1,0 +1,32 @@
+
+
+
+
+
+
+
+
+
+<script>
+    async function checkReady() {
+        try {
+            const res = await fetch('/startup-status', {
+                method: 'GET',
+                cache: 'no-store'
+            });
+
+            const data = await res.json();
+
+            if (data.ready) {
+                window.location.reload();
+                return;
+            }
+        } catch (error) {
+            console.warn('Startup check failed:', error);
+        }
+
+        setTimeout(checkReady, 3000);
+    }
+
+    setTimeout(checkReady, 3000);
+</script>

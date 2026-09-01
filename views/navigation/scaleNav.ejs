@@ -1,0 +1,43 @@
+
+
+
+
+
+
+
+
+
+<% 
+    let navigation = page.info.page_settings.content.navigation || page.module.info.module_settings.content.navigation;
+    let pageURL = data.url;
+%>
+
+<nav class="position-absolute top-50 end-0 translate-middle-y pe-5 h-50 nav nav-fill flex-column" aria-label="Main Navigation" id="navigation-main">
+    <% if (navigation && navigation.links) { %>
+        <% navigation.links.forEach(link => { %>
+            <% if (link?.type === 'element_id') { %>
+              <a
+                href="#<%= link.element_id %>"
+                class="nav-link scroll-link fs-6"
+              >
+            <% } else { %>
+              <a
+                href="<%= link.url %>"
+                class="nav-link fs-6 <%= link.url === data.url ? 'active' : '' %>"
+              >
+            <% } %>
+                <% if (link.icon) { %>
+                    <i class="<%= link.icon %>"></i>
+                <% } %>
+                <%=link.text %>
+            </a>
+        <% }) %>
+    <% } %>
+
+    <% if (page.info.page_options.accounts) { %>
+      <%- include('./accounts.ejs') %>
+    <% } %>
+
+    <!-- Include the theme toggler -->
+    <%- include('./themeToggler.ejs') %>
+</nav>

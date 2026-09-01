@@ -1,0 +1,73 @@
+
+
+
+
+
+
+<style>
+    /* slideshow caption: always white text with a subtle dark outline */
+    .caption-outline,
+    .caption-outline h2,
+    .caption-outline p {
+    color: #fff !important;               /* keep it white */
+    text-shadow:
+        0 0   6px  rgba(0,0,0,.6),        /* soft glow */
+        0 0  12px  rgba(0,0,0,.5),        /* slightly larger */
+        -1px -1px 2px rgba(0,0,0,.7),      /* crisp outline */
+        1px  1px 2px rgba(0,0,0,.7);
+    }
+</style>
+
+<% if (!slideshow || !slideshow.slides) { %>
+    <div class="alert alert-danger" role="alert">
+        <strong>Error:</strong> Slideshow data is missing or invalid.
+    </div>
+<% } else if (Object.values(slideshow.slides).length === 0) { %>
+    <div class="alert alert-warning" role="alert">
+        <strong>Warning:</strong> No media files found in the slideshow.
+    </div>
+<% } else { %>
+    <div id="<%= slideshow.id %>" class="carousel slide mb-6 h-100" data-bs-ride="carousel">
+        <div class="carousel-indicators">
+            <% for (let i = 0; i < Object.values(slideshow.slides).length; i++) { %>
+                <button type="button" data-bs-target="#<%= slideshow.id %>" data-bs-slide-to="<%= i %>" class="<%= i === 0 ? 'active' : '' %>" aria-label="Slide <%= i + 1 %>"></button>
+            <% } %>
+        </div>
+
+        <% let classes = ['text-start', 'text-center', 'text-end']; %>
+
+        <div class="carousel-inner h-100">
+            <% Object.values(slideshow.slides).forEach((slide, i) => { %>
+                <div class="carousel-item h-100 <%= i === 0 ? 'active' : '' %>">
+                    <img src="<%= slide?.media?.url || slide?.url || slide?.info?.url %>" class="object-fit-cover w-100 h-100 d-block" alt="<%= slide?.message || slide?.metadata?.description || slide?.info?.metadata?.description || slideshow?.description || ""  %>">
+                    <div class="container h-100">
+                        <div class="carousel-caption d-block caption-outline <%= classes[i % classes.length] %>">
+                            <h2 class="tw-lg"><%= slide?.title || slide?.metadata?.title || slide?.info?.metadata?.title || slideshow?.title || ""%></h2>
+                            <p class="fw-bold tw"><%= slide?.message || slide?.description || slide?.metadata?.description || slide?.info?.metadata?.description || slideshow?.description || "" %></p>
+                            <% if (slide?.buttons && slide.buttons?.length) { %>
+                                <% for (let b of slide.buttons) { %>
+                                    <p><a href="<%= b?.url || b?.link?.url || b?.link %>" class="btn btn-primary"><%= b.text %></a></p>
+                                <% } %>
+                            <% } else if (slide?.link) { %>
+                                <p><a href="<%= slide?.link?.url || slide.link %>" class="btn btn-primary"><%= slide?.link?.text || "Learn More" %></a></p>
+                            <% } else if (slide?.metadata?.link) { %>
+                                <p><a href="<%= slide?.metadata?.link?.url || slide.metadata.link %>" class="btn btn-primary"><%= slide?.metadata?.link?.text || "Learn More" %></a></p>
+                            <% } else if (slideshow.link) { %>
+                                <p><a href="<%= slideshow?.link?.url || slideshow.link %>" class="btn btn-primary"><%= slideshow?.link?.text || "Learn More" %></a></p>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+            <% }); %>
+        </div>
+        
+        <button class="carousel-control-prev" type="button" data-bs-target="#<%= slideshow.id %>" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#<%= slideshow.id %>" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Next</span>
+        </button>
+    </div>
+<% } %>

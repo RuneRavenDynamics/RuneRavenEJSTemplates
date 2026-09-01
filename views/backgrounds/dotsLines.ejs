@@ -1,0 +1,255 @@
+
+
+
+
+
+
+
+
+
+<div class="canvasContainer">
+    <canvas id="dotsLinesCanvas"></canvas>
+</div>
+
+<style>
+    canvas, canvas::before, canvas::after {
+        box-sizing: border-box;
+    }
+
+    .canvasContainer {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+    }
+
+    #dotsLinesCanvas {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        background-color: white;
+    }
+</style>
+
+<script>
+    // 2D Canvas Setup
+
+    let dotsLinesCanvas;
+    let ctx;
+    let dots = [];
+    const dotCount = 50;
+    let mouseX = 0;
+    let mouseY = 0;
+
+    //Gradients Setup
+    let gradient1;
+    let gradient2;
+    let dotsColor;
+    let linesColor;
+    let wavesColor;
+
+
+    function dotsLines(canvasId, overlayId_=null,gradient1_=null,gradient2_=null,dotsColor_=null,linesColor_=null,wavesColor_=null) {
+        dotsLinesCanvas = document.querySelector(`#${canvasId}`);
+        if (!dotsLinesCanvas) {
+            return;
+        }
+        let overlayId = overlayId_ ?? 'none';
+        gradient1 = gradient1_ ?? '153, 0, 214';
+        gradient2 = gradient2_ ?? '235, 105, 170';
+        dotsColor = dotsColor_ ?? '255, 255, 255';
+        linesColor = linesColor_ ?? '255, 255, 255';
+        wavesColor = wavesColor_ ?? '255, 255, 255';
+        ctx = dotsLinesCanvas.getContext('2d');
+
+        dotsLinesCanvas.width = window.innerWidth;
+        dotsLinesCanvas.height = window.innerHeight;
+
+        // Listen for mousemove event on the canvas itself
+        dotsLinesCanvas.addEventListener('mousemove', function(e) {
+            const rect = dotsLinesCanvas.getBoundingClientRect();
+            mouseX = e.clientX - rect.left;
+            mouseY = e.clientY - rect.top;
+        });
+
+        if (!overlayId === 'none') { // Attach event listener to the site title for forwarding
+            document.querySelector(`#${overlayId}`).addEventListener('mousemove', forwardEventToCanvas);
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+
+        init();
+    }
+
+
+    // Forwarding function
+    function forwardEventToCanvas(e) {
+        // Calculate the correct position based on the canvas position
+        var rect = dotsLinesCanvas.getBoundingClientRect();
+        var scaleX = dotsLinesCanvas.width / rect.width;
+        var scaleY = dotsLinesCanvas.height / rect.height;
+
+        // Adjust mouse position considering canvas scale and position
+        mouseX = (e.clientX - rect.left) * scaleX;
+        mouseY = (e.clientY - rect.top) * scaleY;
+
+        // Manually trigger the canvas mousemove event with adjusted positions
+        const canvasEvent = new MouseEvent('mousemove', {
+            clientX: mouseX,
+            clientY: mouseY
+        });
+
+        dotsLinesCanvas.dispatchEvent(canvasEvent);
+    }
+
+    // Main 2d Function Animation
+
+    function animate() {
+        // Create a linear gradient from bottom left to top right
+        let gradient = ctx.createLinearGradient(0, dotsLinesCanvas.height, dotsLinesCanvas.width, 0);
+
+        // Add color stops to the gradient
+        gradient.addColorStop(0, `rgba(${gradient1}, 1)`); // Color at the bottom left
+        gradient.addColorStop(1, `rgba(${gradient2}, 1)`); // Color at the top right
+
+        // Use the gradient to fill the canvas background
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, dotsLinesCanvas.width, dotsLinesCanvas.height);
+
+        // Draw the wavy ground on each frame
+        drawWavyGround();
+
+        dots.forEach(dot => {
+            dot.update();
+            dot.draw();
+        });
+        drawLines();
+        requestAnimationFrame(animate);
+    }
+
+
+    function resizeCanvas() {
+        dotsLinesCanvas.width = window.innerWidth;
+        dotsLinesCanvas.height = window.innerHeight;
+
+        init();
+    }
+
+    // Bouncing Dots Background Effect
+
+    class Dot {
+        constructor() {
+            this.x = Math.random() * dotsLinesCanvas.width;
+            this.y = Math.random() * dotsLinesCanvas.height;
+            this.velX = ((Math.random() - 0.5) * 2) / 4;
+            this.velY = ((Math.random() - 0.5) * 2) / 4;
+            this.size = Math.random() * 4 + 2; // Size range from 2 to 6
+            this.opacity = Math.random() * (.6 - .1) + .1; // Opacity range from 0.3 to 0.8
+        }
+
+        update() {
+            this.x += this.velX;
+            this.y += this.velY;
+
+            // Bounce off walls
+            if (this.x <= 0 || this.x >= dotsLinesCanvas.width) this.velX *= -1;
+            if (this.y <= 0 || this.y >= dotsLinesCanvas.height) this.velY *= -1;
+        }
+
+        draw() {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(${dotsColor}, ${this.opacity})`;
+            ctx.fill();
+        }
+    }
+
+    function init() {
+        // Clear the existing dots array
+        dots = [];
+
+        // Then repopulate it with new Dot instances
+        for (let i = 0; i < dotCount; i++) {
+            dots.push(new Dot());
+        }
+
+        // If you have animations or requestAnimationFrame loop started in init,
+        // ensure to manage or reset them appropriately to avoid multiple loops.
+        requestAnimationFrame(animate);
+    }
+
+    function drawLines() {
+        for (let i = 0; i < dots.length; i++) {
+            // Draw lines between dots first
+            for (let j = i + 1; j < dots.length; j++) {
+                let distance = Math.sqrt(Math.pow(dots[i].x - dots[j].x, 2) + Math.pow(dots[i].y - dots[j].y, 2));
+                let opacity = 1 - distance / 200; // Adjust 300 to control the fading distance
+                if (opacity > 0) { // Only draw if opacity is positive
+                    ctx.beginPath();
+                    ctx.moveTo(dots[i].x, dots[i].y);
+                    ctx.lineTo(dots[j].x, dots[j].y);
+                    ctx.strokeStyle = `rgba(${linesColor}, ${opacity})`;
+                    ctx.stroke();
+                }
+            }
+
+            // Then draw lines from dots to mouse
+            let distanceToMouse = Math.sqrt(Math.pow(dots[i].x - mouseX, 2) + Math.pow(dots[i].y - mouseY, 2));
+            let opacityToMouse = 1 - distanceToMouse / 300; // Use the same fading logic
+            if (opacityToMouse > 0) { // Only draw if opacity is positive
+                ctx.beginPath();
+                ctx.moveTo(dots[i].x, dots[i].y);
+                ctx.lineTo(mouseX, mouseY);
+                ctx.strokeStyle = `rgba(${linesColor}, ${opacityToMouse})`;
+                ctx.stroke();
+            }
+        }
+    }
+
+
+    // Wave Background Effect
+
+    // Wave Background Effect Adjustments
+    let baseWaveAmplitude = 10; // Base height of the waves
+    let waveFrequency = 0.002; // Lower frequency for longer, further apart waves
+    let wavePhase = 0; // Initial phase shift of the wave
+    let waveSpeed = 0.005; // Slower wave movement for a calmer effect
+
+    function drawWavyGround() {
+        const groundHeight = 100; // Height of the "ground" area where waves are drawn
+        const layers = 3; // Fewer layers for less screen space coverage
+        const startY = dotsLinesCanvas.height - groundHeight; // Starting Y position for drawing waves
+
+        for (let i = 0; i < layers; i++) {
+            ctx.beginPath();
+            let opacity = 0.4 + (i * 0.2); // Adjusted opacity for visibility
+            if (i == 2) {
+                opacity = 1;
+            }
+            let waveAmplitude = baseWaveAmplitude + i * 5; // Increment wave height for each layer
+
+            // Adjust the starting Y position based on the layer to stack them
+            let layerStartY = startY + (i * 20);
+
+            for (let x = 0; x <= dotsLinesCanvas.width; x++) {
+                let y = waveAmplitude * Math.sin(x * waveFrequency + wavePhase + i * 50) + layerStartY;
+                ctx.lineTo(x, y);
+            }
+
+            // Close the path for the current layer to fill the area below it
+            ctx.lineTo(dotsLinesCanvas.width, dotsLinesCanvas.height);
+            ctx.lineTo(0, dotsLinesCanvas.height);
+            ctx.closePath();
+
+            ctx.fillStyle = `rgba(${wavesColor}, ${opacity})`;
+            ctx.fill();
+        }
+
+        wavePhase += waveSpeed; // Increment the phase for animation
+    }
+
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        dotsLines("dotsLinesCanvas", overlayId_="pageContent");
+    });
+</script>

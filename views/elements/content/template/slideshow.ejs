@@ -1,0 +1,40 @@
+
+
+
+
+
+
+
+
+
+<section 
+    class="vw-100 vh-50 mb-2" 
+    id="<%= elementId %>" 
+    style="<%= formatElementStyles(element.styles || []) %>" 
+    <%= typeof scrollElement !== 'undefined' && scrollElement ? 'data-scroll-section' : '' %>
+    >
+    <% if (element.template.options.type === 'custom') { %>
+        <!-- Carousel Hero -->
+        <div class="container-fluid mh-100 h-100 overflow-hidden">
+            <%- include('../../media/carousel', {
+                slideshow: {
+                    id: `business-hero-${elementId}`,
+                    type: "swiper-gallery",
+                    title: element.template.options.title,
+                    description: element.template.options.message,
+                    slides: element.template.options.slides
+                }
+            }) %>
+        </div>
+    <% } else if (element.template.options.type === 'container') { %>
+        <% 
+            elementData.object.title = business.info.name;
+            elementData.object.description = business.info.description;
+        %>
+        <!-- Carousel Hero -->
+        <div class="container-fluid mh-100 h-100 overflow-hidden">
+            <%- include('../../object/container/display', { object: elementData.object }) %>
+        </div>
+    <% } %>
+
+</section>

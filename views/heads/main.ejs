@@ -1,0 +1,130 @@
+
+
+
+
+
+
+
+
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<!-- 1) Connection hints: earliest wins -->
+<link rel="preconnect" href="https://cdn.runeravendynamics.com" crossorigin>
+<link rel="dns-prefetch" href="//cdn.runeravendynamics.com">
+<link rel="preconnect" href="https://api.runeravendynamics.com" crossorigin>
+<link rel="dns-prefetch" href="//api.runeravendynamics.com">
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+<link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
+
+<!-- 2) Preloads for critical assets (fonts/hero image/critical css) -->
+<!-- examples:
+<link rel="preload" as="font" href="/fonts/YourFont.woff2" type="font/woff2" crossorigin>
+<link rel="preload" as="image" href="/img/hero-1200x630.jpg" fetchpriority="high">
+-->
+
+<!-- Meta Data -->
+<title><%= page.info.page_settings.seo.title %></title>
+
+<meta name="description" content="<%= page.info.page_settings.seo.description %>">
+<!--<meta name="keywords" content="">-->
+<meta name="author" content="RuneRaven Dynamics">
+<meta name="robots" content="index, follow">
+
+<!-- Facebook Open Graph Tags -->
+<meta property="og:type" content="website" />
+<meta property="og:url" content="<%= data.url %>" />
+<meta property="og:title" content="<%= page.info.page_settings.seo.title %>" />
+<meta property="og:site_name" content="<%= app.info.name %>" />
+<meta property="og:description" content="<%= page.info.page_settings.seo.description %>" />
+<meta property="og:image" content="<%= page.info.page_settings.seo.icon.url %>" />
+<meta property="og:image:alt" content="<%= page.info.page_settings.seo.title %>" />
+
+<!-- Facebook App ID -->
+<meta property="fb:app_id" content="1515396669308775" />
+
+
+<!-- Twitter -->
+<meta property="twitter:card" content="summary_large_image">
+<meta property="twitter:url" content="<%= data.url %>">
+<meta property="twitter:title" content="<%= page.info.page_settings.seo.title %>">
+<meta property="twitter:description" content="<%= page.info.page_settings.seo.description %>">
+<meta property="twitter:image" content="<%= page.info.page_settings.seo.icon.url %>">
+
+<!-- Other Meta Tags -->
+<link rel="canonical" href="<%= data.url %>">
+
+
+<!-- Schema Markup -->
+<% const schemaJSON =
+  typeof page.info.page_settings.seo.schema === 'string'
+    ? page.info.page_settings.seo.schema
+    : JSON.stringify(page.info.page_settings.seo.schema, null, 2)
+        .replace(/</g, '\\u003c')
+        .replace(/>/g, '\\u003e')
+        .replace(/&/g, '\\u0026'); %>
+
+<script type="application/ld+json"><%- schemaJSON %></script>
+
+
+
+<!-- Load Scripts & Styles
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+<script src="https://cdn.runeravendynamics.com/clientapi/latest/api.bundle.js" type="module" defer crossorigin="anonymous"></script>-->
+<link rel="stylesheet" href="https://cdn.runeravendynamics.com/clientapi/latest/api.bundle.css" crossorigin="anonymous">
+<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css' integrity='anonymous' crossorigin='anonymous' referrerpolicy='no-referrer' />
+
+<%- include('./vars.ejs') %>
+
+
+<!-- Page Assets & PWA Meta -->
+ <link rel="manifest" href="/site.webmanifest">
+ 
+<%- include('./assets.ejs') %>
+
+
+<style>
+
+@keyframes rr-selected-pulse {
+    0% {
+        box-shadow:
+            0 0 0 2px rgba(77,171,255,.35),
+            0 0 12px rgba(77,171,255,.6);
+    }
+
+    50% {
+        box-shadow:
+            0 0 0 4px rgba(77,171,255,.5),
+            0 0 24px rgba(77,171,255,1);
+    }
+
+    100% {
+        box-shadow:
+            0 0 0 2px rgba(77,171,255,.35),
+            0 0 12px rgba(77,171,255,.6);
+    }
+}
+
+.selectedPageElement {
+    animation: rr-selected-pulse 1.25s ease-in-out infinite;
+    position: relative;
+    outline: 3px solid #4dabff;
+    outline-offset: 2px;
+    box-shadow:
+        0 0 0 2px rgba(77,171,255,.35),
+        0 0 16px rgba(77,171,255,.75),
+        0 0 32px rgba(77,171,255,.35);
+    border-radius: 8px;
+    transition: all .15s ease;
+    z-index: 999;
+}
+</style>
+
+
+<!-- 
+
+<meta name="google-adsense-account" content="ca-pub-1348474591800119">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1348474591800119"crossorigin="anonymous"></script>
+
+-->

@@ -1,0 +1,27 @@
+
+
+
+
+
+
+
+
+
+<% 
+    let navigation = page.info.page_settings.content.navigation || page.module.info.module_settings.content.navigation;
+    let pageURL = data.url;
+%>
+
+<ul class="nav col-md-6" aria-label="Main Navigation">
+    <% if (navigation && navigation.links) { %>
+        <% navigation.links.forEach(link => { %>
+            <% if (link.url == pageURL) { %>
+                <li class="nav-item active">
+            <% } else { %>
+                <li class="nav-item">
+            <% } %>
+                <a href="<%= link.url %>" class="nav-link px-2 text-body-secondary"><%=link.text %></a>
+            </li>
+        <% }) %>
+    <% } %>
+</ul>

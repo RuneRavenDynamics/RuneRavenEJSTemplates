@@ -1,0 +1,146 @@
+<style>
+    .pageHeader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      width: 100%;
+      z-index: 1000;
+      background-color: var(--bs-body-bg);
+      display: flex;
+      flex-direction: column;
+    }
+
+  
+    /* Example: pinned header with border. Adjust as you like. */
+    header.navbar {
+      border-bottom: 1px solid #ccc;
+    }
+  
+    /* Example: quick fix for spacing when using fixed header. 
+       Adjust your page's top padding/margin so content doesn't hide behind header. */
+    main {
+      padding-top: 5rem;
+    }
+
+    .maintenance-alert {
+      font-size: 1em
+    }
+  
+    @media (max-width: 768px) {
+      .pageHeader {
+          width: 100%;
+      }
+    }
+  </style>
+  
+  <header class="navbar navbar-expand-lg navbar-light pageHeader">
+    <div class="container-fluid mx-auto justify-content-around">
+      <!-- Logo / Brand -->
+      <a href="/" class="navbar-brand d-flex align-items-center">
+        <% if (business.info.business_options?.logo?.url) { 
+            const logoUrl = business.info.business_options.logo.url;
+            const extension = logoUrl.split('.').pop().toLowerCase();
+            const isSvg = (extension === 'svg'); 
+        %>
+          <% if (isSvg) { %>
+            <!-- Render SVG as <object> for better vector scaling -->
+            <object 
+              data="<%= logoUrl %>" 
+              type="image/svg+xml" 
+              width="40" 
+              height="40" 
+              class="d-inline-block bi me-2"
+              style="border-radius: 25%;"
+            >
+              <img src="<%= logoUrl %>" alt="Logo" width="40" height="40">
+            </object>
+          <% } else { %>
+            <img 
+              src="<%= logoUrl %>" 
+              alt="Logo" 
+              width="40" 
+              height="40" 
+              class="d-inline-block bi me-2"
+              style="border-radius: 25%;"
+            >
+          <% } %>
+        <% } %>
+        <span class="fs-5"><%= business.info.name %></span>
+      </a>
+  
+      <!-- Optional breadcrumb -->
+      <% if (page.info.page_settings.content.navigation?.breadcrumbs) { 
+          // Convert object to array
+          let crumbs = page.info.page_settings.content.navigation.breadcrumbs;
+        %>
+
+        <nav class="ms-3 me-auto d-none d-lg-block" aria-label="breadcrumb">
+          <ol class="breadcrumb m-0">
+            <% let pageURL = data.url %>
+            <% for (let breadcrumb of crumbs) { %>
+              <% if (breadcrumb.url === pageURL) { %>
+                <li class="breadcrumb-item active" aria-current="page">
+                  <%= breadcrumb.text %>
+                </li>
+              <% } else { %>
+                <li class="breadcrumb-item">
+                  <a href="<%= breadcrumb.url %>"><%= breadcrumb.text %></a>
+                </li>
+              <% } %>
+            <% } %>
+          </ol>
+        </nav>
+
+      <% } %>
+  
+      <!-- Navbar toggler (visible on small screens) -->
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#navbarNav"
+        aria-controls="navbarNav"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon" style="color: white;"></span>
+      </button>
+  
+        <!-- Collapsible area -->
+        <div class="collapse navbar-collapse justify-content-around w-50 flex-grow-0" id="navbarNav">
+            <!-- Include the main navigation pills -->
+            <%- include('../navigation/mainResponsive.ejs') %>
+
+        </div>
+    </div>
+
+    <!-- Maintenance if toggled -->
+     <% if (app.info.application_state.status === 'maintenance') { %>
+
+        <%- include('../elements/utility/maintenanceAlert.ejs') %>
+    
+    <% } %>
+  </header>
+  
+  <script type="module">
+    import { api } from "https://cdn.runeravendynamics.com/clientapi/latest/api.bundle.js";
+
+    await api.initialize();
+    let header = document.querySelector('.pageHeader');
+    api.tools.AM.setAnimationEvent('scrollTop', function() {
+      api.tools.AM.gsap.to(header, {
+        y: "0%",
+        duration: 0.7,
+        ease: "power2.out",
+      });
+    });
+    api.tools.AM.setAnimationEvent('scrollDown', function() {
+      api.tools.AM.gsap.to(header, {
+        y: "-100%",
+        duration: 0.7,
+        ease: "power2.out",
+      });
+    });
+  </script>
+  

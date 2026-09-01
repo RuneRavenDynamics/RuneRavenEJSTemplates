@@ -1,0 +1,153 @@
+
+
+
+
+
+<style>
+    .pageFooter {
+        transform: translateY(100%) translateX(-50%);
+        visibility: hidden
+    }
+</style>
+
+
+
+<div class="container mx-auto pageFooter">
+    <footer class="d-flex flex-wrap justify-content-between align-items-center py-2 border-top">
+        <div class="col-md-3 d-flex align-items-center">
+            <% if (business.info.logo) { %>
+                <a href="/" class="mb-3 me-2 mb-md-0 text-body-secondary text-decoration-none lh-1">
+                    <img src="<%= business.info.logo %>" alt="<%= business.info.name %>" width="40" height="40" class="d-inline-block bi me-2" style="border-radius: 25%;">
+                </a>
+            <% } %>
+            <span class="mb-3 mb-md-0 text-body-secondary">© <%= date %> <%= business.info.name %>, Inc</span>
+        </div>
+
+        <%- include('../navigation/smallNav.ejs') %>
+
+        <%- include('../navigation/privacyandterms.ejs') %>
+
+        <% if (business.info.social) { %>
+            <ul class="nav col-md-1 justify-content-end list-unstyled d-flex">
+                <% if (business.info.social.facebook) { %>
+                    <li class="ms-3">
+                        <a class="text-body-secondary" href="<%= business.info.social.facebook %>" target="_blank" rel="noopener noreferrer">
+                            <i class="fab fa-facebook-square"></i>
+                        </a>
+                    </li>
+                <% } %>
+
+                <% if (business.info.social.instagram) { %>
+                    <li class="ms-3">
+                        <a class="text-body-secondary" href="<%= business.info.social.instagram %>" target="_blank" rel="noopener noreferrer">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                    </li>
+                <% } %>
+
+                <% if (business.info.social.twitter) { %>
+                    <li class="ms-3">
+                        <a class="text-body-secondary" href="<%= business.info.social.twitter %>" target="_blank" rel="noopener noreferrer">
+                            <i class="fa-brands fa-x-twitter"></i>
+                        </a>
+                    </li>
+                <% } %>
+
+                <% if (business.info.social.linkedin) { %>
+                    <li class="ms-3">
+                        <a class="text-body-secondary" href="<%= business.info.social.linkedin %>" target="_blank" rel="noopener noreferrer">
+                            <i class="fab fa-linkedin"></i>
+                        </a>
+                    </li>
+                <% } %>
+
+                <% if (business.info.social.youtube) { %>
+                    <li class="ms-3">
+                        <a class="text-body-secondary" href="<%= business.info.social.youtube %>" target="_blank" rel="noopener noreferrer">
+                            <i class="fab fa-youtube"></i>
+                        </a>
+                    </li>
+                <% } %>
+
+                <% if (business.info.social.pinterest) { %>
+                    <li class="ms-3">
+                        <a class="text-body-secondary" href="<%= business.info.social.pinterest %>" target="_blank" rel="noopener noreferrer">
+                            <i class="fab fa-pinterest"></i>
+                        </a>
+                    </li>
+                <% } %>
+
+                <% if (business.info.social.tiktok) { %>
+                    <li class="ms-3">
+                        <a class="text-body-secondary" href="<%= business.info.social.tiktok %>" target="_blank" rel="noopener noreferrer">
+                            <i class="fab fa-tiktok"></i>
+                        </a>
+                    </li>
+                <% } %>
+
+                <% if (business.info.social.snapchat) { %>
+                    <li class="ms-3">
+                        <a class="text-body-secondary" href="<%= business.info.social.snapchat %>" target="_blank" rel="noopener noreferrer">
+                            <i class="fab fa-snapchat"></i>
+                        </a>
+                    </li>
+                <% } %>
+
+                <% if (business.info.social.tumblr) { %>
+                    <li class="ms-3">
+                        <a class="text-body-secondary" href="<%= business.info.social.tumblr %>" target="_blank" rel="noopener noreferrer">
+                            <i class="fab fa-tumblr"></i>
+                        </a>
+                    </li>
+                <% } %>
+
+                <% if (business.info.social.reddit) { %>
+                    <li class="ms-3">
+                        <a class="text-body-secondary" href="<%= business.info.social.reddit %>" target="_blank" rel="noopener noreferrer">
+                            <i class="fab fa-reddit"></i>
+                        </a>
+                    </li>
+                <% } %>
+
+                <% if (business.info.social.whatsapp) { %>
+                    <li class="ms-3">
+                        <a class="text-body-secondary" href="<%= business.info.social.whatsapp %>" target="_blank" rel="noopener noreferrer">
+                            <i class="fab fa-whatsapp"></i>
+                        </a>
+                    </li>
+                <% } %>
+
+                <% if (business.info.social.telegram) { %>
+                    <li class="ms-3">
+                        <a class="text-body-secondary" href="<%= business.info.social.telegram %>" target="_blank" rel="noopener noreferrer">
+                            <i class="fab fa-telegram"></i>
+                        </a>
+                    </li>
+                <% } %>
+            </ul>
+        <% } %>
+    </footer>
+</div>
+
+<script type="module">
+    import { api } from "https://cdn.runeravendynamics.com/clientapi/latest/api.bundle.js";
+
+    await api.initialize();
+    let footer = document.querySelector('.pageFooter');
+    
+    api.tools.AM.setAnimationEvent('scrollBottom', function() {
+        api.tools.AM.gsap.to(footer, {
+            y: "0%",
+            visibility: "visible",
+            duration: 0.3,
+            ease: "power2.out",
+        });
+    })
+    api.tools.AM.setAnimationEvent('scrollUp', function() {
+        api.tools.AM.gsap.to(footer, {
+            y: "100%",
+            duration: 0.3,
+            ease: "power2.out",
+        });
+    })
+</script>

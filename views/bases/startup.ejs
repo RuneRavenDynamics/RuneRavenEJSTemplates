@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('../heads/main.ejs') %>
+    <title><%= app.info.name %> Loading</title>
+</head>
+<body id="default-page" data-scroll-container>
+
+    <script type="application/json" id="application-data-element">
+        <%- JSON.stringify({ app, business: business, brand: brand, data: {}, user: {} }) %>
+    </script>
+
+    <main class="pageContent h-auto" id="pageContent">
+        <div class="pageContent-content w-100 h-100" id="pageContent-content">
+            <%- body %>  <!-- ✅ Page content goes here -->
+        </div>
+    </main>
+
+    <%- include('../elements/utility/loadElements.ejs') %>
+
+</body>
+</html>

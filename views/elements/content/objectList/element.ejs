@@ -1,0 +1,13 @@
+
+
+
+
+
+
+
+
+
+<section id="<%= elementId %>" style="<%= formatElementStyles(element.styles || []) %>" <%= typeof scrollElement !== 'undefined' && scrollElement ? 'data-scroll-section' : '' %>>
+    <%- include(`../../object/${element.objects.type}/list`, {objects: elementData}) %>
+</section>
+  

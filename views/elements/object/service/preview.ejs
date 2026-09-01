@@ -1,0 +1,59 @@
+
+
+
+
+
+
+
+
+
+<style>
+    .service-card {
+        height: 300px;  /* Adjust the height as needed */
+        overflow: hidden; /* Hide any overflowing content */
+    }
+
+    .service-card .card-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;       /* Scale the image to fill the container and crop if necessary */
+        object-position: center; /* Keep the image centered */
+    }
+
+    .service-card .card-img-overlay {
+        background-color: #00000094;
+    }
+
+    .service-placeholder{
+        width:100%;
+        height:100%;
+        background:linear-gradient(
+            135deg,
+            var(--bs-primary),
+            var(--bs-secondary)
+        );
+
+        color:white;
+    }
+
+</style>
+
+
+<div class="card text-bg-dark service-card">
+    <% if (Object.values(object.media.files)?.[0]?.url) { %>
+        <img src="<%= Object.values(object.media.files)[0].url %>" class="card-img" alt="<%= Object.values(object.media.files)[0].description || object.info.name %>">
+    <% } else { %>
+        <div class="card-img service-placeholder d-flex flex-column justify-content-center align-items-center">
+            <i class="<%= object?.info?.icon || 'fa-solid fa-screwdriver-wrench' %> fa-5x mb-3"></i>
+        </div>
+    <% } %>
+    <div class="card-img-overlay d-flex flex-column justify-content-center align-items-center">
+        <h4 class="card-title fs-1 fw-bold"><%= object.info.name %></h4>
+        <p class="card-text"><%= object.info.description %></p>
+        <% if (object?.elementId) { %>
+            <a href="#<%= object.elementId %>" class="btn btn-primary scroll-link">Learn More..</a>
+        <% } else if (object?.endpoint || object?.info?.endpoint) { %>
+            <a href="<%= `https://${data.domain}${object?.endpoint || object?.info?.endpoint}` %>" class="btn btn-primary">Learn More..</a>
+        <% } %>
+    </div>
+</div>

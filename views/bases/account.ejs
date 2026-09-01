@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <script>
+        window.deferredPrompt = null;
+
+        window.addEventListener('beforeinstallprompt', (event) => {
+            console.log('[PWA] beforeinstallprompt fired');
+
+            event.preventDefault();
+            window.deferredPrompt = event;
+        });
+    </script>
+    <%- include('../heads/main.ejs') %>
+</head>
+<body id="<%= page.module.info.name ?? "default" %>-page" data-scroll-container>
+
+    <!-- Flash Messages -->
+        <div class="container flash-messages">
+            <% if (messages) { %>
+                <% if (messages.success && messages.success.length) { %>
+                    <% messages.success.forEach(msg => { %>
+                        <div class="alert alert-success" role="alert"><%= msg %></div>
+                    <% }) %>
+                <% } %>
+                
+                <% if (messages.error && messages.error.length) { %>
+                    <% messages.error.forEach(msg => { %>
+                        <div class="alert alert-danger" role="alert"><%= msg %></div>
+                    <% }) %>
+                <% } %>
+            <% } %>
+    </div>
+
+    <script type="application/json" id="application-data-element">
+        <%- JSON.stringify({ app, business, brand, page, data, user: session.user }) %>
+    </script>
+
+
+    <% if (page.info.page_settings?.content?.header?.view) { %>
+        <% if (page.info.page_settings.content.header.view === 'default') { %>
+            <%- include('../headers/mainResponsive') %>
+        <% } else { %>
+            <%- include(`../headers/${page.info.page_settings.content.header.view}`); %>
+        <% } %>
+    <% } %>
+
+    <main class="pageContent h-100 pb-5" id="pageContent">
+        <div class="pageContent-content w-100 h-100" id="pageContent-content">
+            <% if (page.info.page_settings?.content?.background?.view) { %>
+                <% if (page.info.page_settings.content.background.view === 'default') { %> 
+                
+                <% } else { %>
+                    <%- include(`../backgrounds/${page.info.page_settings.content.background.view}`); %>
+                <% } %>
+            <% } %>
+            <%- body %>  <!-- ✅ Page content goes here -->
+        </div>
+    </main>
+    
+    <%- include('../elements/utility/loadElements.ejs') %>
+
+    <% if (page.info.page_settings?.content?.footer?.view) { %>
+        <% if (page.info.page_settings.content.footer.view === 'default') { %>
+            <%- include(`../footers/main`); %>
+        <% } else { %>
+            <%- include(`../footers/${page.info.page_settings.content.footer.view}`); %>
+        <% } %>
+    <% } %>
+</body>
+</html> 

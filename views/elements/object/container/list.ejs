@@ -1,0 +1,29 @@
+
+
+
+
+
+
+
+
+
+<!-- Dynamic Galleries Display -->
+<div class="container-fluid h-auto mb-5">
+    <% if (objects?.title) { %>
+        <h4 class="pb-2 border-bottom mb-2"><%= titleCase(objects?.title) %></h4>
+    <% } %>
+    
+    <% for (const container of objects?.objects || objects || []) { %>
+        <section id="<%= container?.elementId || `container-${container.info.id}` %>">
+            <div class="col-md-12">
+                <div class="row gy-5 my-5">
+                    <div class="col-md-12 parallax-up">
+                        <h3 class="fw-bold fs-2"><%= container.info.name %></h3>
+                        <p><%= container.info.description %></p>
+                        <%- include('./display', { object: container }) %>
+                    </div>
+                </div>
+            </div>
+        </section>
+    <% } %>
+</div>

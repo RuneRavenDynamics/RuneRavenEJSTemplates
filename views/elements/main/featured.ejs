@@ -1,0 +1,206 @@
+
+
+
+
+
+
+
+
+
+<style>
+    .image-header-text {
+        color: white;
+        text-shadow: 2px 3px black;
+    }
+</style>
+
+<%
+  const f = featured || {};
+  const type = f.type || 'columns-icons';
+  const id = f.id || 'featured-section';
+  const heading = f.heading || '';
+  const subheading = f.subheading || '';
+  const items = Array.isArray(f.items) ? f.items : [];
+%>
+
+<% if (type === 'columns-icons') { %>
+  <!-- Columns with icons -->
+  <section class="container px-4 py-5" id="<%= id %>">
+    <% if (heading) { %>
+      <h2 class="pb-2 border-bottom"><%= heading %></h2>
+    <% } %>
+
+    <div class="row g-4 py-5 row-cols-1 row-cols-lg-3">
+      <% items.forEach(function(item) { %>
+        <div class="feature col">
+          <div class="feature-icon d-inline-flex align-items-center justify-content-center text-bg-primary bg-gradient fs-2 mb-3">
+            <% if (item.icon) { %>
+              <i class="<%= item.icon %>" aria-hidden="true"></i>
+            <% } %>
+          </div>
+          <h3 class="fs-2 text-body-emphasis"><%= item.title || 'Featured title' %></h3>
+          <p><%= item.text || '' %></p>
+          <% if (item.href) { %>
+            <a href="<%= item.href %>" class="icon-link">
+              <%= item.linkText || 'Call to action' %>
+              <i class="<%= item.linkIcon || 'fa-solid fa-chevron-right' %>" aria-hidden="true"></i>
+            </a>
+          <% } %>
+        </div>
+      <% }); %>
+    </div>
+  </section>
+
+<% } else if (type === 'hanging-icons') { %>
+  <!-- Hanging icons -->
+  <section class="container px-4 py-5" id="<%= id %>">
+    <% if (heading) { %>
+      <h2 class="pb-2 border-bottom"><%= heading %></h2>
+    <% } %>
+
+    <div class="row g-4 py-5 row-cols-1 row-cols-lg-3">
+      <% items.forEach(function(item) { %>
+        <div class="col d-flex align-items-start">
+          <div class="icon-square text-body-emphasis bg-body-secondary d-inline-flex align-items-center justify-content-center fs-4 flex-shrink-0 me-3">
+            <% if (item.icon) { %>
+              <i class="<%= item.icon %>" aria-hidden="true"></i>
+            <% } %>
+          </div>
+          <div>
+            <h3 class="fs-2 text-body-emphasis"><%= item.title || 'Featured title' %></h3>
+            <p><%= item.text || '' %></p>
+            <% if (item.href) { %>
+              <a href="<%= item.href %>" class="<%= item.btnClass || 'btn btn-primary' %>">
+                <%= item.linkText || f.btnText || 'Primary button' %>
+              </a>
+            <% } %>
+          </div>
+        </div>
+      <% }); %>
+    </div>
+  </section>
+
+<% } else if (type === 'custom-cards') { %>
+  <!-- Custom cards -->
+  <section class="container px-4 py-5" id="<%= id %>">
+    <% if (heading) { %>
+      <h2 class="pb-2 border-bottom"><%= heading %></h2>
+    <% } %>
+
+    <div class="row row-cols-1 row-cols-lg-3 align-items-stretch g-4 py-5">
+
+      <% items.forEach(function(item) { %>
+        <div class="col">
+
+          <% if (item.href) { %>
+            <!-- Make whole card clickable -->
+            <a href="<%= item.href %>" class="text-decoration-none text-reset">
+          <% } %>
+
+            <div class="card card-cover h-100 overflow-hidden text-bg-dark rounded-4 shadow-lg"
+                style="<% if (item.bgImage) { %>background-image: url('<%= item.bgImage %>');<% } %>">
+
+              <div class="d-flex flex-column h-100 p-5 pb-3 text-shadow-1">
+
+                <h3 class="pt-5 mt-5 mb-4 display-6 lh-1 fw-bold image-header-text">
+                  <%= item.title || 'Featured title' %>
+                </h3>
+
+                <ul class="d-flex list-unstyled mt-auto">
+                  <% if (item.avatarSrc) { %>
+                    <li class="me-auto">
+                      <img src="<%= item.avatarSrc %>"
+                           alt="<%= item.avatarAlt || 'Avatar' %>"
+                           width="32" height="32"
+                           class="rounded-circle border border-white">
+                    </li>
+                  <% } %>
+
+                  <% if (item.location) { %>
+                    <li class="d-flex align-items-center me-3">
+                      <i class="<%= item.locationIcon || 'fa-solid fa-location-dot' %> me-2"></i>
+                      <small><%= item.location %></small>
+                    </li>
+                  <% } %>
+
+                  <% if (item.duration) { %>
+                    <li class="d-flex align-items-center">
+                      <i class="<%= item.durationIcon || 'fa-regular fa-calendar' %> me-2"></i>
+                      <small><%= item.duration %></small>
+                    </li>
+                  <% } %>
+                </ul>
+
+              </div>
+            </div>
+
+          <% if (item.href) { %>
+            </a>
+          <% } %>
+
+        </div>
+      <% }); %>
+
+    </div>
+  </section>
+<% } else if (type === 'icon-grid') { %>
+  <!-- Icon grid -->
+  <section class="container px-4 py-5" id="<%= id %>">
+    <% if (heading) { %>
+      <h2 class="pb-2 border-bottom"><%= heading %></h2>
+    <% } %>
+
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4 py-5">
+      <% items.forEach(function(item) { %>
+        <div class="col d-flex align-items-start">
+          <% if (item.icon) { %>
+            <i class="<%= item.icon %> text-body-secondary flex-shrink-0 me-3" aria-hidden="true"></i>
+          <% } %>
+          <div>
+            <h3 class="fw-bold mb-0 fs-4 text-body-emphasis"><%= item.title || 'Featured title' %></h3>
+            <p><%= item.text || '' %></p>
+          </div>
+        </div>
+      <% }); %>
+    </div>
+  </section>
+
+<% } else if (type === 'title-with-features') { %>
+  <!-- Features with title (left panel + grid) -->
+  <section class="container px-4 py-5" id="<%= id %>">
+    <% if (heading) { %>
+      <h2 class="pb-2 border-bottom"><%= heading %></h2>
+    <% } %>
+
+    <div class="row row-cols-1 row-cols-md-2 align-items-md-center g-5 py-5">
+      <div class="col d-flex flex-column align-items-start gap-2">
+        <h2 class="fw-bold text-body-emphasis"><%= f.title || heading || 'Features' %></h2>
+        <% if (subheading) { %>
+          <p class="text-body-secondary"><%= subheading %></p>
+        <% } %>
+        <% if (f.btnHref) { %>
+          <a href="<%= f.btnHref %>" class="btn btn-primary btn-lg">
+            <%= f.btnText || 'Primary button' %>
+          </a>
+        <% } %>
+      </div>
+
+      <div class="col">
+        <div class="row row-cols-1 row-cols-sm-2 g-4">
+          <% items.forEach(function(item) { %>
+            <div class="col d-flex flex-column gap-2">
+              <div class="feature-icon-small d-inline-flex align-items-center justify-content-center text-bg-primary bg-gradient fs-4 rounded-3">
+                <% if (item.icon) { %>
+                  <i class="<%= item.icon %>" aria-hidden="true"></i>
+                <% } %>
+              </div>
+              <h4 class="fw-semibold mb-0 text-body-emphasis"><%= item.title || 'Featured title' %></h4>
+              <p class="text-body-secondary"><%= item.text || '' %></p>
+            </div>
+          <% }); %>
+        </div>
+      </div>
+    </div>
+  </section>
+
+<% } %>

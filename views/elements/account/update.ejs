@@ -1,0 +1,45 @@
+
+
+
+
+
+
+
+
+
+<div class="container my-3">
+    <div class="card shadow">
+        <div class="card-header text-white">
+            <h3 class="mb-0">Account Profile</h3>
+        </div>
+        <div class="card-body" id="update-account-form-container">
+            
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { api } from "https://cdn.runeravendynamics.com/clientapi/latest/api.bundle.js";
+
+    await api.initialize();
+    let formContainer = document.querySelector('#update-account-form-container');
+
+    formContainer.innerHTML = ``;
+    let accountForm = await api.graph.elements.element({
+        action: "create",
+        element: "object",
+        object: api.tools.A.info.user,
+        id: `object-${api.tools.A.info.user.info.id}`,
+        content: [
+            {
+                id: "form",
+                options: {
+                    element: "form",
+                    properties: ['first_name', 'last_name', 'email', 'phone', 'dob', 'company', 'username'],
+                }
+            }
+        ],
+        parent: formContainer,
+        classes: 'update-account-element',
+    });
+</script>

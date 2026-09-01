@@ -1,0 +1,37 @@
+
+
+
+
+
+
+
+
+
+<% 
+    let navigation = page.info.page_settings.content.navigation || page.module.info.module_settings.content.navigation;
+%>
+
+<ul class="nav nav-pills nav-fill mx-auto" aria-label="Main Navigation" id="navigation-main">
+    <% if (navigation && navigation.links) { %>
+        <% navigation.links.forEach(link => { %>
+            <li class="nav-item" role="presentation">
+                <% if (link?.type === 'element_id') { %>
+                <a
+                    href="#<%= link.element_id %>"
+                    class="nav-link scroll-link fs-6"
+                >
+                <% } else { %>
+                <a
+                    href="<%= link.url %>"
+                    class="nav-link fs-6 <%= link.url === data.url ? 'active' : '' %>"
+                >
+                <% } %>
+                    <% if (link.icon) { %>
+                        <i class="<%= link.icon %>"></i>
+                    <% } %>
+                    <%=link.text %>
+                </a>
+            </li>
+        <% }) %>
+    <% } %>
+</ul>

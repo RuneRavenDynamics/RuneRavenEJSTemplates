@@ -1,0 +1,46 @@
+
+
+
+
+
+
+
+
+
+<!-- Swiper Container -->
+<div class="swiper <%= slideshow?.type || "" %>" id="<%= slideshow.id %>">
+    <div class="swiper-wrapper">
+        <% let first = true;
+            for (let [key, slide] of Object.entries(slideshow.slides)) { %>
+            <div class="swiper-slide">
+                <img
+                    class="img-fluid rounded"
+                    src="<%= slide?.media?.url || slide?.url || slide?.info?.url %>"
+                    alt="<%= slide?.title || slide?.name || slide?.info?.name || key %>"
+                    width="<%= slide?.metadata?.width || slide?.info?.metadata?.width || slideshow?.options?.media?.width || 1600 %>"
+                    height="<%= slide?.metadata?.height || slide?.info?.metadata?.height || slideshow?.options?.media?.height || 900  %>"
+                    loading="<%= first ? 'eager' : 'lazy' %>"
+                    decoding="async"
+                    fetchpriority="<%= first ? 'high' : 'low' %>"
+                >
+                <% if ( slide?.message || slide?.description || slide?.metadata?.description || slide?.info?.metadata?.description ) {
+                    let description = slide?.message || slide?.description || slide?.metadata?.description || slide?.info?.metadata?.description; %>
+                    <p class="caption"><%= description %></p>
+                <% } %>
+                <% if (!first) { %>
+                    <div class="swiper-lazy-preloader"></div>
+                <% } %>
+                <% first = false %>
+            </div>
+        <% }; %>
+    </div>
+
+    <% if (slideshow?.options?.navigation) { %>
+        <div class="swiper-button-next"></div>
+        <div class="swiper-button-prev"></div>
+    <% } %>
+
+    <% if (slideshow?.options?.pagination) { %>
+        <div class="swiper-pagination"></div>
+    <% } %>
+</div>

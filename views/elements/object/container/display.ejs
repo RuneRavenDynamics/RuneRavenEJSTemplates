@@ -1,0 +1,18 @@
+
+
+
+
+
+
+
+
+
+<%- include(`../../media/${object?.template || 'carousel'}`, {
+    slideshow: {
+        id: `business-hero-${object.info.uoid}`,
+        type: "swiper-gallery",
+        title: `${object?.title || object.info.name}`,
+        description: object?.description || object.info.description,
+        slides: object.media.files
+    }
+}) %>

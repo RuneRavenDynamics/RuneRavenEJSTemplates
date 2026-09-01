@@ -1,0 +1,51 @@
+<div class="container my-5 py-5" id="overlay-container">
+  <h1 class="orbitron mb-4">Terms of Service</h1>
+  <p>Last Updated: <%= new Date().toLocaleDateString() %></p>
+
+  <section class="mb-5">
+    <p>Welcome to <strong><%= app.info.name %></strong>, an online platform operated by <strong><%= business.info.name %></strong> ("we", "our", or "us").  
+    By accessing or using our website (<%= data.domain %>), mobile app, or related services (collectively, the "Service"), you agree to these Terms of Service ("Terms").  
+    If you do not agree, please do not use the Service.</p>
+  </section>
+
+  <h3>1. Account Creation</h3>
+  <p>To use certain features, you must create an account. You agree to provide accurate, current, and complete information during registration and to keep your information updated.  
+  You are responsible for safeguarding your password and for all activities under your account.</p>
+
+  <h3>2. Use of the Service</h3>
+  <p>You agree to use the Service only for lawful purposes and in accordance with these Terms. You may not:
+    <ul>
+      <li>Access, tamper with, or use non-public areas of our system.</li>
+      <li>Use the Service to distribute malware, spam, or harmful content.</li>
+      <li>Reverse-engineer, copy, or reproduce our software without consent.</li>
+    </ul>
+  </p>
+
+  <h3>3. Payments and Subscriptions</h3>
+  <p>Payments for any subscriptions, services, or digital goods are handled through our secure payment processors.  
+  All fees are clearly stated during checkout and are subject to applicable taxes. By purchasing, you agree to the associated pricing and billing terms.</p>
+
+  <h3>4. Intellectual Property</h3>
+  <p>All content, logos, trademarks, and software provided by <%= business.info.name %> are the exclusive property of the company.  
+  You may not use or distribute our intellectual property without written consent.</p>
+
+  <h3>5. Termination</h3>
+  <p>We may suspend or terminate your access to the Service if you violate these Terms or engage in behavior that harms our users or systems.</p>
+
+  <h3>6. Limitation of Liability</h3>
+  <p>We strive to provide reliable services, but <%= business.info.name %> and its affiliates shall not be liable for indirect, incidental, or consequential damages arising from your use of the Service.</p>
+
+  <h3>7. Modifications to the Terms</h3>
+  <p>We reserve the right to modify these Terms at any time. Updates will be posted here, and continued use of the Service after changes implies acceptance.</p>
+
+  <h3>8. Contact Information</h3>
+  <p>For questions about these Terms, please contact us at:
+    <br/><strong>Email:</strong> <%= page.data.location.info.email || "support@" + data.domain %><br/>
+    <strong>Address:</strong> <%= page.data.location.info.address || "Business Address Unavailable" %>
+  </p>
+
+  <hr class="my-5"/>
+  <p class="text-muted small">
+    © <%= new Date().getFullYear() %> <%= business.info.name %>. All rights reserved.
+  </p>
+</div>

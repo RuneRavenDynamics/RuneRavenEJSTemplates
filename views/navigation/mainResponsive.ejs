@@ -1,0 +1,53 @@
+
+
+
+
+
+
+
+
+
+<% 
+    let navigation = page.info.page_settings.content.navigation || page.module.info.module_settings.content.navigation;
+    let pageURL = data.url;
+%>
+
+<ul class="navbar-nav nav-pills nav-fill flex-grow-1 align-items-center mb-2 mb-lg-0" id="navigation-main">
+    <% if (navigation && navigation.links) { %>
+      <% navigation.links.forEach(link => { %>
+        <li class="nav-item">
+          <% if (link?.type === 'element_id') { %>
+              <a
+                href="#<%= link.element_id %>"
+                class="nav-link scroll-link fs-6 p-2"
+              >
+            <% } else { %>
+              <a
+                href="<%= link.url %>"
+                class="nav-link fs-6 p-2 <%= link.url === data.url ? 'active' : '' %>"
+              >
+            <% } %>
+            <% if (link.icon) { %>
+              <i class="<%= link.icon %> me-1"></i>
+            <% } %>
+            <%= link.text %>
+          </a>
+        </li>
+      <% }) %>
+    <% } %>
+
+    <!-- Accounts dropdown, if needed -->
+    <% if (page.info.page_options.accounts) { %>
+      <%- include('./accounts.ejs') %>
+    <% } %>
+
+    <% if (app.info.application_options?.versions?.pwa?.enabled || page.info.page_options.webapp) { %>
+      <button id="downloadAppBtn" class="btn btn-primary ms-2 d-inline-flex m-auto pwa-download-button">
+        <i class="fa fa-download me-1"></i> Download app
+      </button>
+    <% } %>
+
+    <!-- Include the theme toggler -->
+    <%- include('./themeToggler.ejs') %>
+  </ul>
+  

@@ -1,0 +1,189 @@
+
+
+
+
+
+
+<%
+    function convertTo12Hour(timeStr) {
+        if (!timeStr) return '';
+
+        const [hourStr, minute] = timeStr.split(':');
+        let hour = parseInt(hourStr, 10);
+        return to12h(hour, minute);
+    }
+%>
+
+<!-- Location Section -->
+<section class="my-5 py-5">
+    <div class="container">
+
+        <div class="row my-5">
+            <div class="col text-center">
+                <h2 class="display-5 fw-bold text-primary">Primary Location: <%= object.info.name %></h2>
+                <p class="text-muted">Find us below and explore our service area & hours</p>
+            </div>
+        </div>
+    
+        <div class="row g-4 align-items-stretch">
+            <!-- Address + Map -->
+            <div class="col-md-6">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="bi bi-geo-alt-fill me-2 text-danger"></i>Address</h5>
+                        <% if (object.info.address) { %>
+                            <p class="mb-3">
+                                <% if (object.info.address.line1) { %><%= `${object.info.address.line1}, ${object.info.address?.line2 || ''}` %><br><% } %>
+                                <% if (object.info.address.city) { %><%= object.info.address.city %>, <% } %>
+                                <% if (object.info.address.state) { %><%= object.info.address.state %> <% } %>
+                                <% if (object.info.address.postal_code) { %><%= object.info.address.postal_code %><br><% } %>
+                                <% if (object.info.address.country) { %><%= object.info.address.country %><% } %>
+                            </p>
+                        <% } else { %>
+                            <p class="text-muted">No address provided.</p>
+                        <% } %>
+    
+                        <!-- Map Embed -->
+                        <% if (object.info && object.info.address) {
+                            const addrParts = [];
+                            if (object.info.address.line1) addrParts.push(`${object.info.address.line1}, ${object.info.address?.line2 || ''}`);
+                            if (object.info.address.city) addrParts.push(object.info.address.city);
+                            if (object.info.address.state) addrParts.push(object.info.address.state);
+                            if (object.info.address.postal_code) addrParts.push(object.info.address.postal_code);
+                            if (object.info.address.country) addrParts.push(object.info.address.country);
+                            const query = encodeURIComponent(addrParts.join(' '));
+                            const googleMapEmbed = `<iframe src="https://www.google.com/maps/embed/v1/place?key=${keys.google}&q=${query}" width="100%" height="250" style="border:0;" allowfullscreen loading="lazy"></iframe>`;
+                        %>
+                            <div class="ratio ratio-16x9">
+                                <%- googleMapEmbed %>
+                            </div>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+    
+            <!-- Image Slider -->
+            <div class="col-md-6">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="bi bi-images me-2 text-info"></i>Gallery</h5>
+                        <% if (object.media && Object.keys(object.media.files).length > 0) { %>
+                            <div class="swiper swiper-media-cube mt-3">
+                                <div class="swiper-wrapper">
+                                    <% for (const [key, media] of Object.entries(object.media.files)) { %>
+                                        <div class="swiper-slide">
+                                            <img src="<%= media.url %>" alt="<%= key %>" class="img-fluid rounded shadow-sm" loading="lazy">
+                                            <div class="swiper-lazy-preloader"></div>
+                                        </div>
+                                    <% } %>
+                                </div>
+                                <div class="swiper-button-next"></div>
+                                <div class="swiper-button-prev"></div>
+                                <div class="swiper-pagination"></div>
+                            </div>
+                        <% } else { %>
+                            <p class="text-muted">No media available.</p>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+        <div class="row g-4 mt-4">
+            <!-- Hours -->
+            <div class="col-md-6">
+                <% if (object.info.hours) { %>
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body">
+                            <h5 class="card-title"><i class="bi bi-clock-history me-2 text-warning"></i>Business Hours</h5>
+                            <ul class="list-group list-group-flush">
+                                <% for (let day in object.info.hours) { 
+                                    const hours = object.info.hours[day];
+                                %>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span><%= day.charAt(0).toUpperCase() + day.slice(1) %></span>
+                                    <span class="fw-semibold">
+                                        <% if (hours.open && hours.close) { %>
+                                            <%= convertTo12Hour(hours.open) %> - <%= convertTo12Hour(hours.close) %>
+                                        <% } else { %>
+                                            Closed
+                                        <% } %>
+                                    </span>
+                                </li>
+                                <% } %>
+                            </ul>
+                        </div>
+                    </div>
+                <% } %>
+            </div>
+
+    
+            <!-- Service Area -->
+            <div class="col-md-6">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="bi bi-geo me-2 text-success"></i>Service Area</h5>
+                        <% if (object.info.service_area && object.info.service_area.latitude && object.info.service_area.longitude && object.info.service_area.radius) { %>
+                            <div class="mt-3 business-location-service-area rounded shadow-sm"
+                                 style="width: 100%; height: 300px;"
+                                 data_latitude="<%=object.info.service_area.latitude%>"
+                                 data_longitude="<%=object.info.service_area.longitude%>"
+                                 data_radius="<%=object.info.service_area.radius%>">
+                            </div>
+                            <script type="module">
+                                import { api } from "https://cdn.runeravendynamics.com/clientapi/latest/api.bundle.js";
+
+                                await api.initialize();
+
+                                api.tools.MPM.setupMap('.business-location-service-area');
+                            </script>
+                        <% } else { %>
+                            <p class="text-muted">Service area information is not available.</p>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row my-5 gy-5">
+            <!-- Contact Information -->
+            <% if (object.info.contact) { %>
+                <div class="col-md-6">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body">
+                            <h5 class="card-title"><i class="bi bi-telephone-fill me-2"></i> Contact Us</h5>
+                            <hr>
+                            <% if (object.info.contact.phone && object.info.contact.phone.primary) { %>
+                                <p><i class="bi bi-phone me-2"></i> <strong>Phone:</strong> <a href="tel:<%= object.info.contact.phone.primary %>" class="text-primary text-decoration-none"><%= object.info.contact.phone.primary %></a></p>
+                            <% } %>
+                            <% if (object.info.contact.email && object.info.contact.email.primary) { %>
+                                <p><i class="bi bi-envelope me-2"></i> <strong>Email:</strong> <a href="mailto:<%= object.info.contact.email.primary %>" class="text-primary text-decoration-none"><%= object.info.contact.email.primary %></a></p>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+            <% } %>
+
+            <!-- Social Links -->
+            <% if (object.info.social) { %>
+                <div class="col-md-6">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body">
+                            <h5 class="card-title"><i class="bi bi-share-fill me-2"></i> Follow Us</h5>
+                            <hr>
+                            <div class="d-flex flex-wrap">
+                                <% for (let platform in object.info.social) { 
+                                    if (object.info.social[platform]) { %>
+                                    <a href="<%= object.info.social[platform] %>" target="_blank" class="btn btn-outline-primary btn-sm me-2 mb-2">
+                                        <i class="bi bi-<%= platform.toLowerCase() %>"></i> <%= platform.charAt(0).toUpperCase() + platform.slice(1) %>
+                                    </a>
+                                <% } } %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <% } %>
+        </div>
+    </div>
+</section>
+  

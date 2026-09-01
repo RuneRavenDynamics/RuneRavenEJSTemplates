@@ -1,0 +1,32 @@
+
+
+
+
+
+
+
+
+
+<div class="d-flex flex-wrap" id="<%= elementId %>" style="<%= formatElementStyles(element.styles || []) %>" <%= typeof scrollElement !== 'undefined' && scrollElement ? 'data-scroll-section' : '' %>>
+    <% for (let content of element.element.options?.content || []) { %>
+
+        <% if (content.type === 'object') { %>
+
+            <%- include(`../object/element`, {elementId: content.elementId, element: content, elementData: page?.data?.[content.elementId], scrollElement: false}) %>
+
+        <% } else if (content.type === 'objectList') { %>
+
+            <%- include(`../objectList/element`, {elementId: content.elementId, element: content, elementData: page?.data?.[content.elementId], scrollElement: false}) %>
+
+        <% } else if (content.type === 'template') { %>
+
+            <%- include(`../template/${content.template.type}.ejs`, {elementId: content.elementId, element: content, elementData: page?.data?.[content.elementId], scrollElement: false}) %>
+
+        <% } else if (content.type === 'custom') { %>
+
+            <%- include(`${content.element.type}.ejs`, {elementId: content.elementId, element: content, elementData: page?.data?.[content.elementId], scrollElement: false}) %>
+
+        <% } %>
+
+    <% } %>
+</div>

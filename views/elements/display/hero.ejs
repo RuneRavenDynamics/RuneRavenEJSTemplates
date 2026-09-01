@@ -1,0 +1,256 @@
+<%
+    const h = hero || {};
+
+    const id = h.id || "hero-section";
+    const type = h.type || "centered";
+
+    const title = h.title || "";
+    const subtitle = h.subtitle || "";
+    const message = h.message || "";
+
+    const media = h.media || null;
+
+    const buttons = Array.isArray(h.buttons) ? h.buttons : [];
+%>
+
+<style>
+.hero-background{
+    background-size:cover;
+    background-position:center;
+    background-repeat:no-repeat;
+    position:relative;
+}
+
+.hero-overlay::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:rgba(0,0,0,.45);
+}
+
+.hero-overlay>*{
+    position:relative;
+    z-index:2;
+}
+</style>
+
+<% if(type === "centered"){ %>
+
+<section id="<%= id %>" class="container py-5 text-center">
+
+    <% if(subtitle){ %>
+        <p class="text-body-secondary mb-2"><%= subtitle %></p>
+    <% } %>
+
+    <h1 class="display-3 fw-bold">
+        <%= title %>
+    </h1>
+
+    <% if(message){ %>
+        <div class="col-lg-6 mx-auto">
+            <p class="lead mb-4">
+                <%= message %>
+            </p>
+        </div>
+    <% } %>
+
+    <% if(buttons.length){ %>
+        <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+            <% buttons.forEach(btn=>{ %>
+
+                <a
+                    href="<%= btn.url || btn.link || '#' %>"
+                    class="<%= btn.class || 'btn btn-primary btn-lg' %>">
+
+                    <% if(btn.icon){ %>
+                        <i class="<%= btn.icon %> me-2"></i>
+                    <% } %>
+
+                    <%= btn.text %>
+
+                </a>
+
+            <% }) %>
+        </div>
+    <% } %>
+
+</section>
+
+<% } else if(type === "media-centered"){ %>
+
+<section id="<%= id %>" class="container px-4 py-5 text-center border-bottom">
+
+    <h1 class="display-4 fw-bold">
+        <%= title %>
+    </h1>
+
+    <% if(message){ %>
+        <div class="col-lg-6 mx-auto">
+            <p class="lead mb-4">
+                <%= message %>
+            </p>
+        </div>
+    <% } %>
+
+    <% if(buttons.length){ %>
+
+    <div class="d-grid gap-2 d-sm-flex justify-content-sm-center mb-5">
+
+        <% buttons.forEach(btn=>{ %>
+
+            <a
+                href="<%= btn.url || btn.link || '#' %>"
+                class="<%= btn.class || 'btn btn-primary btn-lg' %>">
+
+                <% if(btn.icon){ %>
+                    <i class="<%= btn.icon %> me-2"></i>
+                <% } %>
+
+                <%= btn.text %>
+
+            </a>
+
+        <% }) %>
+
+    </div>
+
+    <% } %>
+
+    <% if(media){ %>
+
+    <div class="overflow-hidden" style="max-height:40rem;">
+        <div class="container px-5">
+            <img
+                src="<%= media?.url || media %>"
+                class="img-fluid border rounded-3 shadow-lg"
+                loading="lazy">
+        </div>
+    </div>
+
+    <% } %>
+
+</section>
+
+<% } else if(type === "media-right" || type === "media-left"){ %>
+
+<section id="<%= id %>" class="container col-xxl-8 py-5">
+
+    <div class="row align-items-center g-5 py-5 <%= type === 'media-right' ? 'flex-lg-row-reverse' : '' %>">
+
+        <div class="col-lg-6">
+
+            <% if(media){ %>
+
+                <img
+                    src="<%= media?.url || media %>"
+                    class="img-fluid rounded shadow"
+                    loading="lazy">
+
+            <% } %>
+
+        </div>
+
+        <div class="col-lg-6">
+
+            <% if(subtitle){ %>
+                <p class="text-body-secondary">
+                    <%= subtitle %>
+                </p>
+            <% } %>
+
+            <h1 class="display-5 fw-bold lh-1 mb-3">
+                <%= title %>
+            </h1>
+
+            <% if(message){ %>
+                <p class="lead">
+                    <%= message %>
+                </p>
+            <% } %>
+
+            <% if(buttons.length){ %>
+
+            <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+
+                <% buttons.forEach(btn=>{ %>
+
+                    <a
+                        href="<%= btn.url || btn.link || '#' %>"
+                        class="<%= btn.class || 'btn btn-primary btn-lg' %>">
+
+                        <% if(btn.icon){ %>
+                            <i class="<%= btn.icon %> me-2"></i>
+                        <% } %>
+
+                        <%= btn.text %>
+
+                    </a>
+
+                <% }) %>
+
+            </div>
+
+            <% } %>
+
+        </div>
+
+    </div>
+
+</section>
+
+<% } else if(type === "media-background"){ %>
+
+<section
+    id="<%= id %>"
+    class="hero-background hero-overlay text-white py-5"
+    style="background-image:url('<%= media?.url || media %>');">
+
+    <div class="container text-center py-5">
+
+        <% if(subtitle){ %>
+            <p class="fs-5">
+                <%= subtitle %>
+            </p>
+        <% } %>
+
+        <h1 class="display-2 fw-bold">
+            <%= title %>
+        </h1>
+
+        <% if(message){ %>
+            <div class="col-lg-7 mx-auto">
+                <p class="lead mb-4">
+                    <%= message %>
+                </p>
+            </div>
+        <% } %>
+
+        <% if(buttons.length){ %>
+
+        <div class="d-flex justify-content-center gap-3 flex-wrap">
+
+            <% buttons.forEach(btn=>{ %>
+
+                <a
+                    href="<%= btn.url || btn.link || '#' %>"
+                    class="<%= btn.class || 'btn btn-primary btn-lg' %>">
+
+                    <% if(btn.icon){ %>
+                        <i class="<%= btn.icon %> me-2"></i>
+                    <% } %>
+
+                    <%= btn.text %>
+
+                </a>
+
+            <% }) %>
+
+        </div>
+
+        <% } %>
+
+    </div>
+
+</section>
+
+<% } %>

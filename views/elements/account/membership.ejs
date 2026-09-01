@@ -1,0 +1,1073 @@
+<!-- #membership-tab-pane ... -->
+
+
+<style>
+    .price-old { text-decoration: line-through; opacity: .6; font-weight: 500; }
+    .price-new { font-weight: 700; }
+    .price-save { color: var(--bs-success); font-size: .85rem; }
+</style>
+
+<div class="h-100 container my-3">
+  <div class="card shadow">
+    <div class="card-header text-white">
+      <!--<h3 class="mb-0">Membership</h3>-->
+    </div>
+    <div class="card-body">
+      <div class="row g-4">
+
+        <!-- Memberships(Subscriptions) -->
+        <div class="col-lg-12">
+          <div class="card shadow-sm h-100">
+            <div class="card-header d-flex align-items-start justify-content-between overflow-auto">
+                <div class="d-flex align-items-start justify-content-around flex-column flex-lg-row gap-3 w-25">
+                    <h5 class="mb-0">Memberships</h5>
+                    <div id="subscription-count" class="badge text-bg-secondary">0</div>
+                </div>
+              <button class="btn btn-sm btn-primary subscription-plans-btn" >Membership Options</button>
+            </div>
+            <div class="card-body">
+              <div id="subscription-list" class="row g-3 overflow-auto">
+                <!-- Filled by renderSubscriptions(subscriptions) -->
+              </div>
+              <!-- Empty state -->
+              <div id="subscription-empty" class="text-muted text-center py-4 d-none">
+                No memberships available.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div> <!-- /row -->
+    </div>
+  </div>
+</div>
+
+<script type="module">
+    import { api } from "https://cdn.runeravendynamics.com/clientapi/latest/api.bundle.js";
+
+    await api.initialize();
+
+    function renderSubscriptions(subscriptions) {
+        const container = document.getElementById('subscription-list');
+        const empty     = document.getElementById('subscription-empty');
+        const count     = document.getElementById('subscription-count');
+
+        let list = null;
+        if (Array.isArray(subscriptions)) {
+            list = subscriptions;
+        } else if (typeof subscriptions === 'object' && subscriptions !== null) {
+            list = Object.values(subscriptions);
+        } else {
+            list = [];
+        }
+
+        if (subscriptions) count.textContent = String(list.length);
+
+        // Reset container
+        if (container) container.innerHTML = '';
+
+        // Empty state
+        if (!list.length) {
+            empty?.classList.remove('d-none');
+            return;
+        }
+        empty?.classList.add('d-none');
+
+        const frag = document.createDocumentFragment();
+
+        list.forEach((s) => {
+            // Coerce BigInt/number to normal numbers/strings for display
+            const title = s.info.name;
+            const description = s.info.description;
+            const status = s.info.subscription_state.status;
+
+            const col = document.createElement('div');
+            col.className = 'col-md-12';
+
+            col.innerHTML = `
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                    <div class="d-flex">
+                        <div class="me-3 fs-4" aria-hidden="true">🪙</div>
+                        <div class="flex-grow-1">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                            <strong class="d-block">${String(title ?? '')}</strong>
+                            <div class="text-muted small mt-1">${String(description ?? '')}</div>
+                            </div>
+                            <div class="text-end">
+                            <div>
+                                <span class="badge ${status.toLowerCase() === 'active' ? 'text-bg-success' : 'text-bg-secondary'}">
+                                ${String(status ?? '').toUpperCase() || 'UNKNOWN'}
+                                </span>
+                            </div>
+                            <div class="text-muted small mt-2">
+                                ${s.info.date_created ? new Date(String(s.info.date_created)).toLocaleDateString() : ''}
+                            </div>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                    </div>
+
+                    <div class="card-footer bg-transparent d-flex gap-2 justify-content-end">
+                    <button class="btn btn-sm btn-outline-primary manage-sub-btn" data-id="${s.info?.id ?? ''}">
+                        Manage
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger cancel-sub-btn" data-id="${s.info?.id ?? ''}" ${status.toLowerCase() !== 'active' ? 'disabled' : ''}>
+                        Cancel
+                    </button>
+                    </div>
+                </div>
+            `;
+
+            let manageBtn = col.querySelector(".manage-sub-btn");
+            let cancelBtn = col.querySelector(".cancel-sub-btn");
+            manageBtn.addEventListener('click', () => {
+                const modalId = "subscriptionModal";
+
+                // Price formatting
+                const currency = String(s?.info?.subscription_settings?.pricing?.currency ?? 'USD').toUpperCase();
+                let cents = Number(s?.info?.subscription_settings?.pricing?.amount ?? 0);
+                let totalDiscount = 0;
+                if (s.info.subscription_settings?.pricing?.discounts && s.info.subscription_settings?.pricing?.discounts.length > 0) {
+                    for (let d of s.info.subscription_settings?.pricing?.discounts || []) {
+                        let discount = 0;
+                        if (d.type == 'amount') {
+                            discount = d.amount;
+                        } else if (d.type == 'percent') {
+                            discount = cents * (d.amount / 100);
+                        }
+                        totalDiscount += discount;
+                    }
+                }
+                cents -= totalDiscount;
+                const priceDisplay = cents ? new Intl.NumberFormat(undefined, { style: 'currency', currency }).format(cents / 100) : 'Free';
+
+                // Recurring text (if recurring)
+                let recurringText = '';
+                if (s?.info?.subscription_settings?.schedule?.recurrence?.recurring) {
+                    const period = Number(s?.info.subscription_settings?.schedule?.recurrence?.period ?? 1);
+                    const type = String(s?.info?.subscription_settings?.schedule?.recurrence?.period_type ?? s?.info?.subscription_settings?.schedule?.duration?.period_type ?? 'period');
+                    recurringText = `Recurring • every ${period} ${type}${period > 1 ? 's' : ''}`;
+                }
+
+                // Billing dates (only if set)
+                const lastChargeRaw = s?.info?.subscription_state?.billing?.last_charge_date ?? null;
+                const nextChargeRaw = s?.info?.subscription_state?.billing?.next_charge_date ?? null;
+                const lastCharge = lastChargeRaw ? new Date(String(lastChargeRaw)).toLocaleString() : null;
+                const nextCharge = nextChargeRaw ? new Date(String(nextChargeRaw)).toLocaleString() : null;
+
+                // Grantee
+                const grantee = s?.info?.subscription_options.owner ?? '—';
+
+                const modalContent = `
+                    <div class="p-3">
+                    <h5 class="mb-1">${escapeHtml(s?.info?.name ?? 'Subscription')}</h5>
+                    <div class="text-muted small mb-2">${escapeHtml(s?.info?.description ?? '')}</div>
+
+                    <div class="row g-2 mb-2 small text-muted">
+                        <div class="col-6">
+                        <div class="fw-semibold">Status</div>
+                        <div>${escapeHtml(String(s?.info?.subscription_state.status ?? 'UNKNOWN').toUpperCase())}</div>
+                        </div>
+                        <div class="col-6">
+                        <div class="fw-semibold">Created</div>
+                        <div>${s?.info?.date_created ? escapeHtml(new Date(String(s.info.date_created)).toLocaleDateString()) : '—'}</div>
+                        </div>
+                    </div>
+
+                    <div class="row g-2 mb-2 small text-muted">
+                        <div class="col-6">
+                        <div class="fw-semibold">Price</div>
+                        <div>${escapeHtml(priceDisplay)}</div>
+                        </div>
+                        <div class="col-6">
+                        <div class="fw-semibold">Billing</div>
+                        <div>${escapeHtml(recurringText || 'One-time')}</div>
+                        </div>
+                    </div>
+
+                    ${lastCharge ? `
+                        <div class="mb-1 small text-muted">
+                        <div class="fw-semibold">Last Charge</div>
+                        <div>${escapeHtml(lastCharge)}</div>
+                        </div>` : ''}
+
+                    ${nextCharge ? `
+                        <div class="mb-2 small text-muted">
+                        <div class="fw-semibold">Next Charge</div>
+                        <div>${escapeHtml(nextCharge)}</div>
+                        </div>` : ''}
+
+                    <div class="small text-muted">
+                        <div class="fw-semibold">Grantee</div>
+                        <div>${escapeHtml(grantee)}</div>
+                    </div>
+                    </div>
+                `;
+
+                api.tools.BM.updateModal(modalId, {
+                    title: s?.info?.name ?? 'Subscription',
+                    content: modalContent,
+                    buttons: `
+                    <button class="btn btn-sm btn-outline-danger modal-cancel-sub-btn" data-id="${escapeHtml(s.info?.id ?? '')}" ${s?.info?.subscription_state.status.toLowerCase() !== 'active' ? 'disabled' : ''}>Cancel Subscription</button>
+                    <button class="btn btn-sm btn-outline-secondary modal-close-sub">Close</button>
+                    `
+                });
+
+                api.tools.BM.toggleModal(modalId);
+
+                // wire modal buttons (guard for existence)
+                const modalEl = document.getElementById(modalId);
+                if (!modalEl) return;
+
+                const modalCancelBtn = modalEl.querySelector('.modal-cancel-sub-btn');
+                const modalCloseBtn = modalEl.querySelector('.modal-close-sub');
+
+                modalCloseBtn?.addEventListener('click', () => api.tools.BM.toggleModal(modalId));
+
+                modalCancelBtn?.addEventListener('click', async () => {
+                    api.tools.LM.load(true);
+                    modalCancelBtn.disabled = true;
+                    await buildCancelPlanConfirmation(s);
+                    api.tools.LM.load(false);
+                });
+            });
+
+            cancelBtn.addEventListener('click', async function() {
+                await buildCancelPlanConfirmation(s);
+            })
+
+            frag.appendChild(col);
+        });
+
+        container?.appendChild(frag);
+    }
+
+    async function reloadSubscriptions() {
+        let subscriptions = await api.graph.getNodes(api.tools.A.info.user, "children", {type: "subscription"});
+        subscriptions = subscriptions?.objects || subscriptions || {};
+
+        renderSubscriptions(subscriptions);
+    }
+
+    function setupSubscriptionPlanElement() {
+        let subscriptionPlansElement = document.createElement('div');
+        subscriptionPlansElement.classList.add('subscription-plans-container', 'd-flex', 'flex-wrap', 'gap-3');
+
+        api.tools.BM.createOffcanvas("subscription-plans-offcanvas", "Membership Options", subscriptionPlansElement, 'end', "lg", true, true);
+
+        document.querySelector(".subscription-plans-btn").addEventListener('click', () => {
+            api.tools.BM.toggleOffcanvas("subscription-plans-offcanvas");
+        });
+
+        return subscriptionPlansElement;
+    }
+
+    async function buildSubscriptionPlanElements(subscriptionPlans, subscriptionPlansElement) {
+        
+        let list = null;
+        if (Array.isArray(subscriptionPlans)) {
+            list = subscriptionPlans;
+        } else if (typeof subscriptionPlans === 'object' && subscriptionPlans !== null) {
+            list = Object.values(subscriptionPlans);
+        } else {
+            list = [];
+        }
+        console.log("Building Subscription Plan Option Elements: ", subscriptionPlans, list);
+        for (const subscriptionPlan of list) {
+            let plan = await buildSubscriptionPlanDetailsElement(subscriptionPlan);
+            subscriptionPlansElement.appendChild(plan);
+        }
+    }
+
+
+    async function buildSubscriptionPlanDetailsElement(subscriptionPlan) { 
+        // Accept either { info: {...} } or direct plan object
+        const planObj = subscriptionPlan?.info ? subscriptionPlan.info : (subscriptionPlan || {});
+        const uoid = planObj.uoid ?? `subscription-${planObj.id ?? ''}`;
+        const id = planObj.id ?? '';
+        const name = String(planObj.name ?? planObj.title ?? 'Untitled Plan');
+        const description = String(planObj.description ?? '');
+        const status = String(planObj.status ?? 'unknown').toLowerCase();
+        const currency = String(planObj.subscription_settings.pricing.currency ?? 'USD').toUpperCase();
+        const subscriptionType = String(planObj.subscription_settings.type ?? '');
+        const duration = planObj.subscription_settings.schedule.duration.period ?? null;
+        const durationType = String(planObj.subscription_settings.schedule.duration.period_type ?? '');
+        const defaultPriceCents = Number(planObj.subscription_settings.pricing.amount ?? 0);
+
+        // Variants may live under planObj.variation.variants or planObj.variants
+        const variantsObj = (planObj.subscription_settings.variation && planObj.subscription_settings.variation.variants) || {};
+        const variantEntries = Object.entries(variantsObj);
+
+        // Utility helpers (local to this function)
+        const fmtPrice = (cents) => {
+            const centsNum = Number(cents ?? 0);
+            if (!centsNum) return 'Free';
+            try {
+            return new Intl.NumberFormat(undefined, { style: 'currency', currency }).format(centsNum / 100);
+            } catch (e) {
+            return `${(centsNum / 100).toFixed(2)} ${currency}`;
+            }
+        };
+        const statusBadgeClass = status === 'active' ? 'text-bg-success' : (status === 'inactive' ? 'text-bg-secondary' : 'text-bg-warning');
+
+        // Build variants HTML — if no variants, show the plan as single offering
+        let variantsHtml = '';
+        if (variantEntries.length === 0) {
+            // Single offering (use plan-level price)
+            variantsHtml = `
+            <div class="subscription-variant p-2 border rounded d-flex align-items-center justify-content-between mb-2">
+                <div>
+                <div class="fw-semibold">${escapeHtml(name)}</div>
+                <div class="small text-muted">${escapeHtml(description)}</div>
+                </div>
+                <div class="text-end">
+                <div class="h5 mb-0">${fmtPrice(defaultPriceCents)}</div>
+                <div class="small text-muted">${planObj.subscription_settings.schedule.recurrence.recurring ? 'Recurring' : 'One-time'}${planObj.subscription_settings.schedule.recurrence.recurring && planObj.subscription_settings.schedule.recurrence.period ? ` • every ${planObj.subscription_settings.schedule.recurrence.period} ${escapeHtml(planObj.subscription_settings.schedule.recurrence.period_type ?? 'period')}` : ''}</div>
+                <div class="mt-2">
+                    <button class="btn btn-sm btn-primary subscribe-plan-btn" data-plan-id="${escapeHtml(id)}" data-plan-uoid="${escapeHtml(uoid)}" data-variant-id="">
+                    Add Plan
+                    </button>
+                </div>
+                </div>
+            </div>
+            `;
+        } else {
+            // Multiple variants — list each
+            variantsHtml = variantEntries.map(([variantId, v]) => {
+            const vTitle = escapeHtml(v.title ?? v.name ?? variantId);
+            const vDesc = escapeHtml(v.description ?? '');
+            const vRecurring = !!v.settings.schedule.recurrence.recurring;
+            const vRecurringPeriod = v.settings.schedule.recurrence.period ?? v.settings.schedule.duration.period ?? 1;
+            const vRecurringType = escapeHtml(v.settings.schedule.recurrence.period_type ?? v.settings.schedule.duration.period_type ?? 'period');
+            const recurringText = vRecurring ? `Recurring • every ${vRecurringPeriod} ${vRecurringPeriod > 1 ? vRecurringType + 's' : vRecurringType}` : 'One-time';
+            let baseCents = Number(v.settings.pricing.amount ?? (defaultPriceCents * vRecurringPeriod) ?? 0);
+
+            const meta = computeDiscountMeta({
+                priceCents: baseCents,
+                discounts: v.settings?.pricing?.discounts || [],
+            });
+
+            const vPrice = fmtPrice(meta.finalCents);
+            const originalPrice = meta.hasDiscount ? fmtPrice(meta.originalCents) : null;
+            const saveLine = meta.hasDiscount ? `You save ${fmtPrice(meta.amountOffCents)} / period` : '';
+            const badge = meta.hasDiscount ? `<span class="badge text-bg-danger ms-2">-${meta.percentOff}%</span>` : '';
+
+            return `
+                <div class="subscription-variant p-2 border rounded d-flex align-items-center justify-content-between mb-2" data-variant-id="${escapeHtml(variantId)}">
+                <div>
+                    <div class="fw-semibold">${vTitle}</div>
+                    <div class="small text-muted">${vDesc}</div>
+                </div>
+                <div class="text-end">
+                    <div class="h5 mb-0">
+                        ${meta.hasDiscount ? `<span class="price-old me-2">${originalPrice}</span>` : ''}
+                        <span class="price-new">${vPrice}</span>
+                    </div>
+                    <div class="small text-muted">${recurringText}</div>
+                    ${meta.hasDiscount ? `<div class="price-save">${saveLine}</div>` : ''}
+                    <div class="mt-2">
+                    <button class="btn btn-sm btn-primary subscribe-plan-btn" data-plan-id="${escapeHtml(id)}" data-plan-uoid="${escapeHtml(uoid)}" data-variant-id="${escapeHtml(variantId)}">
+                        Add Plan
+                    </button>
+                    </div>
+                </div>
+                </div>
+            `;
+            }).join('');
+        }
+
+        // Build full card content
+        const content = `
+            <div class="d-flex align-items-start gap-3">
+            <div class="fs-3" aria-hidden="true">🏷️</div>
+            <div class="flex-grow-1">
+                <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h5 class="mb-0">${escapeHtml(name)}</h5>
+                    <div class="text-muted small mt-1">${escapeHtml(description)}</div>
+                    <div class="mt-2 small text-muted">
+                    ${subscriptionType ? `Type: ${escapeHtml(subscriptionType)} • ` : ''}
+                    ${duration ? `Duration: ${escapeHtml(String(duration))} ${escapeHtml(durationType)}` : ''}
+                    </div>
+                </div>
+                <div class="text-end">
+                    <span class="badge ${statusBadgeClass}">${escapeHtml(String(status).toUpperCase())}</span>
+                    <div class="text-muted small mt-2">${planObj.date_created ? new Date(String(planObj.date_created)).toLocaleDateString() : ''}</div>
+                </div>
+                </div>
+
+                <div class="mt-3">
+                ${variantsHtml}
+                </div>
+            </div>
+            </div>
+        `;
+
+        const footer = `
+            <div class="d-flex gap-2 justify-content-end">
+            <button class="btn btn-sm btn-primary view-plan-btn" data-plan-id="${escapeHtml(id)}" data-plan-uoid="${escapeHtml(uoid)}">View Subscription Details</button>
+            </div>
+        `;
+
+        // Create card node using site helper if present, otherwise fallback to manual DOM node
+        let cardNode;
+        if (api.tools && api.tools.BM && typeof api.tools.BM.createCard === 'function') {
+            cardNode = api.tools.BM.createCard(`subscription-${escapeHtml(uoid)}-card`, name, content, footer, 'md', true);
+        } else {
+            // fallback: build DOM element
+            const wrapper = document.createElement('div');
+            wrapper.className = 'card border-0 shadow-sm h-100';
+            wrapper.id = `subscription-${escapeHtml(uoid)}-card`;
+            wrapper.innerHTML = `<div class="card-body">${content}</div><div class="card-footer bg-transparent">${footer}</div>`;
+            cardNode = wrapper;
+        }
+
+        // Wire up subscribe buttons (one per variant or single)
+        const subscribeButtons = cardNode.querySelectorAll('.subscribe-plan-btn');
+        subscribeButtons.forEach(btn => {
+            btn.addEventListener('click', async (ev) => {
+            ev.preventDefault();
+            const planId = btn.getAttribute('data-plan-id') || id;
+            const planUoid = btn.getAttribute('data-plan-uoid') || uoid;
+            const variantId = btn.getAttribute('data-variant-id') || null;
+            const detail = {
+                plan: planObj,
+                planId,
+                planUoid,
+                variantId,
+                variant: variantId ? (variantsObj[variantId] ?? null) : null
+            };
+
+            await buildSubscriptionPlanConfirmation(subscriptionPlan, variantId)
+            // emit event for application to handle (checkout modal, API call, etc.)
+            window.dispatchEvent(new CustomEvent('subscription:choose', { detail }));
+            });
+        });
+
+        // Wire up view button to fire event
+        const viewBtn = cardNode.querySelector('.view-plan-btn');
+        if (viewBtn) {
+            viewBtn.addEventListener('click', async (ev) => {
+                ev.preventDefault();
+                
+                await buildSubscriptionPlanModal(subscriptionPlan);
+                window.dispatchEvent(new CustomEvent('subscription:view', { detail: { plan: planObj, planId: id, planUoid: uoid } }));
+            });
+        }
+
+        return cardNode;
+    }
+
+    async function buildSubscriptionPlanModal(subscriptionPlan) {
+        api.tools.LM.load(true);
+        const service = await api.graph.getNode(subscriptionPlan, "parents", { type: "service" });
+
+        let modalConf = {
+            id: subscriptionPlan.info.uoid,
+            title: subscriptionPlan.info.name,
+            content: null,
+            size: "lg",
+            expandButton: true,
+            scrollable: true
+        }
+
+        modalConf.content = `
+            <div class="container p-3">
+
+                <div class="row g-4"> <!-- Left: media / gallery --> <div class="col-lg-5"> 
+                    <div class="card border-0 shadow-sm"> 
+                        <div class="ratio ratio-4x3 bg-light overflow-hidden"> 
+                            <img src="${(() => { 
+                                const svcFiles = Object.values(service?.media?.files || {}); 
+                                const planFiles = Object.values(subscriptionPlan?.media?.files || {}); 
+                                const file = svcFiles[0] || planFiles[0] || {}; return escapeHtml(file.url || ''); })()}"
+                                alt="${escapeHtml(subscriptionPlan?.info?.name || '')}" class="w-100 h-100 object-fit-cover" 
+                            /> 
+                            </div> <div class="card-body pt-2"> 
+                                <div class="d-flex gap-2 flex-wrap"> ${(() => { 
+                                    const thumbs = Object.values(service?.media?.files || {}).slice(0,6); 
+                                    if (!thumbs.length) return ''; 
+                                    return thumbs.map(f => `
+                                    <img src="${escapeHtml(f.url)}" class="rounded" style="width:72px;height:48px;object-fit:cover;border:1px solid rgba(0,0,0,0.06)">`).join(''); })()} 
+                                </div> 
+                            </div> 
+                        </div> 
+                    </div>
+
+                    <!-- Right: plan & variants -->
+                    <div class="col-lg-7">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                            <h4 class="mb-1">${escapeHtml(subscriptionPlan?.info?.name || 'Untitled Plan')}</h4>
+                            <div class="text-muted small">${escapeHtml(subscriptionPlan?.info?.description || subscriptionPlan?.info?.long_description || '')}</div>
+                            </div>
+                            <div class="text-end">
+                            <span class="badge ${subscriptionPlan?.info?.status === 'active' ? 'text-bg-success' : (subscriptionPlan?.info?.status === 'inactive' ? 'text-bg-secondary' : 'text-bg-warning')}">
+                                ${escapeHtml(String((subscriptionPlan?.info?.status || '').toUpperCase()))}
+                            </span>
+                            <div class="text-muted small mt-2">${subscriptionPlan?.info?.date_created ? new Date(String(subscriptionPlan.info.date_created)).toLocaleDateString() : ''}</div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-3 align-items-center my-3">
+                            <div class="small text-muted">
+                                ${(() => {
+                                const duration = service?.info?.service_settings?.schedule?.duration?.period;
+                                const duration_type = service?.info?.service_settings?.schedule?.duration?.period_type;
+                                const type = service?.info?.service_settings?.type ?? "service";
+                                return `Type: ${type} <br/>Duration: ${duration} <br/>Duration Type: ${duration_type}`;
+                                })()}
+                            </div>
+
+                            <div class="vr"></div>
+
+                            <div class="small text-muted">
+                                ${(() => {
+                                const recurring_period = service?.info?.service_settings?.schedule?.recurrence?.period;
+                                const recurring_type = service?.info?.service_settings?.schedule?.recurrence?.period_type;
+                                return `Scheduled: ${recurring_period} <br/>Per: ${recurring_type}`;
+                                })()}
+                            </div>
+                        </div>
+
+                        <hr/>
+
+                        <div>
+                            <h6 class="mb-2">Available Plans</h6>
+
+                            ${(() => {
+                            const variants = (subscriptionPlan?.info?.subscription_settings?.variation && subscriptionPlan.info.subscription_settings.variation.variants) || {};
+                            const entries = Object.entries(variants || {});
+                            if (!entries.length) {
+                                const priceCents = Number(subscriptionPlan?.info?.subscription_settings?.pricing?.amount ?? 0);
+                                const price = (priceCents ? (new Intl.NumberFormat(undefined, { style: 'currency', currency: String(subscriptionPlan?.info?.subscription_settings?.pricing?.currency ?? 'USD') }).format(priceCents / 100)) : 'Free');
+                                const recurring = !!subscriptionPlan?.info?.subscription_settings?.schedule?.recurrence?.recurring;
+                                const rp = subscriptionPlan?.info?.subscription_settings?.schedule?.recurrence?.period ?? 1;
+                                const rt = subscriptionPlan?.info?.subscription_settings?.schedule?.recurrence?.period_type ?? subscriptionPlan?.info?.subscription_settings?.schedule?.duration?.period_type ?? 'period';
+                                return `
+                                <div class="subscription-variant p-3 border rounded mb-2 d-flex align-items-center justify-content-between">
+                                    <div>
+                                    <div class="fw-semibold">${escapeHtml(subscriptionPlan?.info?.name || '')}</div>
+                                    <div class="small text-muted">${escapeHtml(subscriptionPlan?.info?.description || '')}</div>
+                                    </div>
+                                    <div class="text-end">
+                                    <div class="h5 mb-0">${price}</div>
+                                    <div class="small text-muted">${recurring ? `Recurring • every ${rp} ${rt}${rp>1?'s':''}` : 'One-time'}</div>
+                                    <div class="mt-2">
+                                        <button class="btn btn-sm btn-primary subscribe-plan-btn" data-plan-uoid="${escapeHtml(subscriptionPlan?.info?.uoid || '')}" data-variant-id="">
+                                        Subscribe
+                                        </button>
+                                    </div>
+                                    </div>
+                                </div>
+                                `;
+                            }
+
+                            return entries.map(([vid, v]) => {
+                                const vTitle = escapeHtml(v.title || v.name || vid);
+                                const vDesc = escapeHtml(v.description || '');
+                                const vRecurring = !!v.settings.schedule.recurrence.recurring;
+                                const vPeriod = v.settings.schedule.recurrence.period ??  v.settings.schedule.duration.period ?? 1;
+                                const vType = v.settings.schedule.recurrence.period_type ?? v.settings.schedule.duration.period_type ?? 'period';
+                                let baseCents = Number(v?.settings?.pricing?.amount ?? (subscriptionPlan?.info?.subscription_settings?.pricing?.amount * vPeriod) ?? 0);
+
+                                const meta = computeDiscountMeta({
+                                    priceCents: baseCents,
+                                    discounts: v.settings.pricing.discounts,
+                                });
+
+                                const vPrice = meta.finalCents
+                                ? (new Intl.NumberFormat(undefined, { style: 'currency', currency: String(v?.settings?.pricing?.currency ?? subscriptionPlan?.info?.subscription_settings?.pricing?.currency ?? 'USD') }).format(meta.finalCents / 100))
+                                : 'Free';
+
+                                const vOriginal = meta.hasDiscount
+                                ? new Intl.NumberFormat(undefined, { style: 'currency', currency: String(v?.settings?.pricing?.currency ?? subscriptionPlan?.info?.subscription_settings?.pricing?.currency ?? 'USD') }).format(meta.originalCents / 100)
+                                : null;
+
+                                const badge = meta.hasDiscount ? `<span class="badge text-bg-danger ms-2">-${meta.percentOff}%</span>` : '';
+                                const saveLine = meta.hasDiscount ? `<div class="price-save">You save ${new Intl.NumberFormat(undefined, { style: 'currency', currency: String(v?.settings?.pricing?.currency ?? subscriptionPlan?.info?.subscription_settings?.pricing?.currency ?? 'USD') }).format(meta.amountOffCents / 100)} / period</div>` : '';
+
+                                return `
+                                <div class="subscription-variant p-3 border rounded mb-2 d-flex align-items-center justify-content-between" data-variant-id="${escapeHtml(vid)}">
+                                    <div style="max-width:60%;">
+                                    <div class="fw-semibold">${vTitle}</div>
+                                    <div class="small text-muted">${vDesc}</div>
+                                    </div>
+                                    <div class="text-end">
+                                    <div class="h5 mb-0">
+                                        ${meta.hasDiscount ? `<span class="price-old me-2">${vOriginal}</span>` : ''}
+                                        <span class="price-new">${vPrice}</span> ${badge}
+                                    </div>
+                                    <div class="small text-muted">${vRecurring ? `Recurring • every ${vPeriod} ${vType}${vPeriod>1?'s':''}` : 'One-time'}</div>
+                                    ${meta.hasDiscount ? `<div class="price-save">${saveLine}</div>` : ''}
+                                    <div class="mt-2">
+                                        <button class="btn btn-sm btn-primary subscribe-plan-btn" data-plan-id="${escapeHtml(subscriptionPlan?.info?.id)}" data-plan-uoid="${escapeHtml(subscriptionPlan?.info?.uoid || '')}" data-variant-id="${escapeHtml(vid)}">
+                                        Select
+                                        </button>
+                                    </div>
+                                    </div>
+                                </div>
+                                `;
+                            }).join('');
+                            })()}
+                        </div>
+
+                        <hr/>
+
+                        <div>
+                            <h6 class="mb-2">About this service</h6>
+                            <div class="small text-muted mb-2">${escapeHtml(service.info?.description || service.info?.long_description || '')}</div>
+
+                            <div class="row gy-2">
+                            ${Object.values(service.info?.details || {}).map(d => `
+                                <div class="col-6">
+                                <div class="d-flex gap-2 align-items-start">
+                                    <i class="${escapeHtml(d.icon || 'fa-solid fa-info-circle')} fs-5 text-primary" aria-hidden="true"></i>
+                                    <div>
+                                    <div class="fw-semibold">${escapeHtml(d.name)}</div>
+                                    <div class="small text-muted">${escapeHtml(d.description)}</div>
+                                    </div>
+                                </div>
+                                </div>
+                            `).join('')}
+                            </div>
+
+                            ${service.info.url ? `
+                            <div class="mt-3">
+                                <a href="${escapeHtml(service.info.url || '#')}" class="btn btn-sm btn-outline-primary" target="_blank" rel="noopener noreferrer">View service page</a>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div> 
+            </div>
+        `;
+
+        let modal = api.tools.BM.createModal(modalConf);
+
+        api.tools.BM.toggleModal(modalConf.id);
+
+        modal.querySelectorAll(".subscribe-plan-btn").forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const planId = btn.getAttribute('data-plan-id') || subscriptionPlan.info.id;
+                const planUoid = btn.getAttribute('data-plan-uoid') || subscriptionPlan.info.uoid;
+                const variantId = btn.getAttribute('data-variant-id') || null;
+                const detail = {
+                    plan: subscriptionPlan,
+                    planId,
+                    planUoid,
+                    variantId,
+                    variant: variantId ? (subscriptionPlan.info.subscription_settings.variation.variants[variantId] ?? null) : null
+                };
+
+                await buildSubscriptionPlanConfirmation(subscriptionPlan, variantId)
+            })
+        });
+
+        api.tools.LM.load(false);
+
+    }
+
+    async function buildSubscriptionPlanConfirmation(subscriptionPlan, variationId) {
+        api.tools.LM.load(true);
+
+        let customerObj = await api.graph.getNode(api.tools.A.info.user, "siblings", { type: "customer" });
+
+        if (!customerObj) {
+            api.tools.LM.load(false);
+            api.tools.FLM.warn("Could not find your customer profile. Please contact support.", 5000);
+            return;
+        }
+
+        let stripeaccount = await api.graph.getNode(api.tools.A.info.business, "children", { type: "stripeaccount" });
+
+        if (!stripeaccount) {
+            api.tools.LM.load(false);
+            api.tools.FLM.warn("No Stripe billing channel found. Please contact support.", 5000);
+            return;
+        }
+
+        const selectorId = `membership-payment-method-${variationId}-${Date.now()}`;
+        const paymentMethodContainerId = `${selectorId}-container`;
+
+        let modalConf = {
+            id: `confirm-subscription-${variationId}`,
+            title: `${subscriptionPlan.info.name} ${subscriptionPlan.info.subscription_settings.variation.variants[variationId].title}`,
+            content: null,
+            size: "lg"
+        };
+
+        modalConf.content = `
+            <div class="p-3">
+                <div class="d-flex align-items-start gap-3">
+                    <div class="fs-3" aria-hidden="true">🛒</div>
+
+                    <div class="flex-grow-1">
+                        <h5 class="mb-1">${escapeHtml(subscriptionPlan.info?.name || 'Subscription')}</h5>
+                        <div class="text-muted small mb-2">${escapeHtml(subscriptionPlan.info?.description || subscriptionPlan.info?.long_description || '')}</div>
+
+                        ${(() => {
+                            const variant = variationId ? (subscriptionPlan.info?.subscription_settings?.variation?.variants?.[variationId] ?? null) : null;
+                            const recurring = Boolean((variant && variant?.settings?.schedule?.recurrence?.recurring) ?? subscriptionPlan.info?.subscription_settings?.schedule?.recurrence?.recurring);
+                            const period = (variant && (variant?.settings?.schedule?.recurrence?.period ?? variant?.settings?.schedule?.duration?.period)) ?? (subscriptionPlan.info?.subscription_settings.schedule.recurrence.period ?? subscriptionPlan.info?.subscription_settings.schedule.duration.period ?? 1);
+                            let priceCents = Number((variant && variant?.settings?.pricing?.amount) ?? (subscriptionPlan.info?.subscription_settings?.pricing?.amount * period) ?? 0);
+                            const currency = String((variant && variant?.settings?.pricing?.currency) ?? subscriptionPlan.info?.subscription_settings?.pricing?.currency ?? 'USD').toUpperCase();
+
+                            const meta = computeDiscountMeta({
+                                priceCents,
+                                discounts: variant?.settings?.pricing?.discounts || []
+                            });
+
+                            const priceDisplay = meta.finalCents
+                                ? new Intl.NumberFormat(undefined, { style: 'currency', currency }).format(meta.finalCents / 100)
+                                : 'Free';
+
+                            const originalDisplay = meta.hasDiscount
+                                ? new Intl.NumberFormat(undefined, { style: 'currency', currency }).format(meta.originalCents / 100)
+                                : null;
+
+                            const badge = meta.hasDiscount ? `<span class="badge text-bg-danger ms-2">-${meta.percentOff}%</span>` : '';
+
+                            const type = (variant && (variant.settings?.schedule?.recurrence?.period_type ?? variant.settings?.schedule?.duration?.period_type)) ?? (subscriptionPlan.info?.subscription_settings.schedule.recurrence.period_type ?? subscriptionPlan.info?.subscription_settings.schedule.duration.period_type ?? 'period');
+                            const recurringText = recurring
+                                ? `This is a recurring charge billed every ${period} ${type}${period > 1 ? 's' : ''}.`
+                                : 'This is a one-time charge.';
+
+                            return `
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <div class="fw-semibold">${escapeHtml(variant ? (variant.title || variant.name || variationId) : subscriptionPlan.info?.name)}</div>
+                                            <div class="small text-muted">${escapeHtml(variant ? (variant.description || '') : '')}</div>
+                                        </div>
+
+                                        <div class="text-end">
+                                            <div class="h5 mb-0">
+                                                ${meta.hasDiscount ? `<span class="price-old me-2">${originalDisplay}</span>` : ''}
+                                                <span class="price-new">${priceDisplay}</span> ${badge}
+                                            </div>
+
+                                            ${meta.hasDiscount ? `<div class="price-save">You save ${new Intl.NumberFormat(undefined, { style: 'currency', currency }).format(meta.amountOffCents / 100)} / period</div>` : ''}
+
+                                            <div class="small text-muted">${recurring ? 'Recurring' : 'One-time'}</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="alert alert-warning small mb-3" role="alert">
+                                    <strong>Confirm purchase:</strong> By confirming you authorize a charge of <strong>${priceDisplay}</strong> using the selected payment method. ${escapeHtml(recurringText)}
+                                </div>
+                            `;
+                        })()}
+
+                        <div class="mb-3">
+                            <label class="form-label">Membership / Subscription Grantee</label>
+                            <input type="text" class="form-control" id="subscriptionGrantee" placeholder="Name of Subscription Grantee...">
+                        </div>
+
+                        <div id="${paymentMethodContainerId}" class="mb-3"></div>
+
+                        <div class="d-flex gap-2 justify-content-end">
+                            <button class="btn btn-sm btn-primary confirm-subscribe-btn"
+                                data-plan-uoid="${escapeHtml(subscriptionPlan.info?.uoid || '')}"
+                                data-variant-id="${escapeHtml(variationId || '')}">
+                                Confirm & Subscribe
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        let modal = api.tools.BM.createModal(modalConf);
+        api.tools.BM.toggleModal(modalConf.id);
+
+        let selectedPaymentMethodId = null;
+
+        await api.tools.FM.buildStripePaymentMethodSelectorElement({
+            id: selectorId,
+            parent: modal.querySelector(`#${CSS.escape(paymentMethodContainerId)}`),
+            stripeaccount,
+            customer: customerObj,
+            clientType: stripeaccount.info?.data?.type === "external_stripe" ? "account" : "platform",
+            settlementType: "account",
+            allowSavedMethods: true,
+            allowNewMethod: true,
+            defaultMode: "saved",
+            intent: "store",
+            selectedCallback: async ({ paymentMethodId }) => {
+                selectedPaymentMethodId = paymentMethodId;
+            },
+            afterCallback: async (result, intentObject, selection) => {
+                selectedPaymentMethodId = selection?.paymentMethodId || selectedPaymentMethodId;
+            }
+        });
+
+        let confirmBtn = modal.querySelector(".confirm-subscribe-btn");
+
+        confirmBtn.addEventListener("click", async function() {
+            api.tools.LM.load(true);
+
+            let variation = subscriptionPlan.info.subscription_settings.variation.variants[variationId];
+            let granteeName = modal.querySelector("#subscriptionGrantee").value;
+
+            if (!granteeName) {
+                api.tools.LM.load(false);
+                api.tools.FLM.warn("Must provide name of grantee for membership!", 5000);
+                return;
+            }
+
+            const selectorInput = modal.querySelector(`#${CSS.escape(selectorId)}-selected-payment-method`);
+            selectedPaymentMethodId = selectedPaymentMethodId || selectorInput?.value || null;
+
+            if (!selectedPaymentMethodId) {
+                api.tools.LM.load(false);
+                api.tools.FLM.warn("Please select or add a payment method before confirming.", 5000);
+                return;
+            }
+
+            let newSubscriptionInfo = {
+                type: "subscription",
+                name: `${subscriptionPlan.info.name}-${variation.title}`,
+                description: `${subscriptionPlan.info.description} This is the ${variation.title} variant of this subscription.`,
+                subscription_options: {
+                    owner: granteeName,
+                    provider: {
+                        type: "stripeaccount",
+                        id: stripeaccount.info?.id,
+                        connection: {
+                            type: "business",
+                            id: api.tools.A.info.business?.info?.id,
+                            relation: "children"
+                        }
+                    },
+                    payment_method: {
+                        source: selectedPaymentMethodId,
+                        customerId: customerObj?.info?.third_party?.stripe?.id,
+                    },
+                },
+                subscription_settings: {
+                    type: variation?.settings?.type || subscriptionPlan.info.subscription_settings.type,
+                    plan: {
+                        id: subscriptionPlan.info.id,
+                        type: "subscriptionPlan",
+                        connection: {},
+                        options: {
+                            variation: variationId
+                        }
+                    },
+                    pricing: variation?.settings?.pricing || subscriptionPlan.info.subscription_settings.pricing,
+                    schedule: variation?.settings?.schedule || subscriptionPlan.info.subscription_settings.schedule,
+                    charge: variation?.settings?.charge || subscriptionPlan.info.subscription_settings.charge,
+                    retries: variation?.settings?.retries || subscriptionPlan.info.subscription_settings.retries,
+                    email: variation?.settings?.email || subscriptionPlan.info.subscription_settings.email,
+                    access: subscriptionPlan.info.subscription_settings.access
+                },
+            };
+
+            console.log("Creating new Stripe Subscription: ", newSubscriptionInfo);
+
+            api.tools.RM.setHost(window.location.hostname);
+            let result = await api.tools.RM.send("account/create-subscription", "POST", {
+                subscription: newSubscriptionInfo
+            });
+
+            console.log("Result: ", result);
+
+            api.tools.LM.load(false);
+
+            let message;
+            if (result.subscription && result.subscription?.info?.subscription_state?.billing?.last_payment_result) {
+                if (result.subscription?.info?.subscription_state?.billing?.last_payment_result.ok) {
+                    message = "Subscription Created & Charged Successfully!";
+                } else {
+                    message = result.subscription?.info?.subscription_state?.billing?.last_payment_result?.message || "AN UNKNOWN ERROR HAS OCCURED, TRY AGAIN OR CONTACT SUPPORT..";
+                }
+            } else {
+                message = "AN UNKNOWN ERROR HAS OCCURED, TRY AGAIN OR CONTACT SUPPORT..";
+            }
+
+            api.tools.BM.toggleModal(modalConf.id);
+            api.tools.FLM.info(message, 6000);
+            await reloadSubscriptions();
+        });
+
+        api.tools.LM.load(false);
+    }
+
+    async function buildCancelPlanConfirmation(subscription) {
+        const modalId = 'confirmCancelModal';
+        const subName = subscription?.info?.name ?? 'this subscription';
+
+        api.tools.BM.createModal({
+            id: modalId,
+            title: 'Cancel Subscription',
+            content: `
+                <div class="p-3">
+                    <p class="mb-2">Are you sure you want to cancel <strong>${escapeHtml(subName)}</strong>?</p>
+                    <div class="text-muted small">This stops future billing and may end access immediately.</div>
+                </div>
+            `,
+            buttons: `
+                <button class="btn btn-sm btn-danger confirm-cancel-yes">Yes, cancel</button>
+                <button class="btn btn-sm btn-outline-secondary confirm-cancel-no">No</button>
+            `
+        });
+
+        api.tools.BM.toggleModal(modalId);
+
+        const modalEl = document.getElementById(modalId);
+        if (!modalEl) return;
+
+        const yesBtn = modalEl.querySelector('.confirm-cancel-yes');
+        const noBtn = modalEl.querySelector('.confirm-cancel-no');
+
+        noBtn?.addEventListener('click', () => api.tools.BM.toggleModal(modalId));
+
+        yesBtn?.addEventListener('click', async () => {
+            api.tools.LM.load(true);
+            yesBtn.disabled = true;
+            try {
+                await api.graph.callObjectMethod(subscription, "setStatus", { status: "CANCELLED" });
+                await reloadSubscriptions();
+                api.tools.BM.toggleModal(modalId);
+            } catch (err) {
+                console.error('Cancel failed', err);
+                yesBtn.disabled = false;
+            }
+            api.tools.LM.load(false);
+        });
+    }
+
+    async function warnAddDefaultBillingCard() {
+        let modalConf = {
+            id: "default-card-missing-warning",
+            title: "Add Default Billing Card to Add Subscription Plan",
+            content: null,
+            buttons: null
+        }
+
+        modalConf.content = `
+            <div class="p-3"> 
+                <div class="d-flex gap-3 align-items-start">
+                    <div class="fs-2" aria-hidden="true">⚠️</div>
+                    <div class="flex-grow-1">
+                        <h5 class="mb-1">No default billing card found</h5>
+                        <p class="mb-2 text-muted"> To subscribe to a plan you must have a saved payment method and set one card as your <strong>default billing card</strong>. </p>
+                        <div class="alert alert-info small mb-3">
+                            <strong>Tip:</strong> Open the Billing tab, add a card, then click <em>Set as default</em> on the card you want billed for subscriptions.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        modalConf.buttons = `
+            <button class="btn btn-sm btn-primary open-billing-btn" >Open Billing</button>
+        `;
+
+        let modal = api.tools.BM.createModal(modalConf);
+
+        let billingBtn = modal.querySelector(".open-billing-btn");
+        billingBtn.addEventListener("click", function() {
+            let billingLink = document.querySelector("#billing-tab");
+            api.tools.BM.toggleModal(modalConf.id);
+            billingLink.click();
+        })
+
+        api.tools.BM.toggleModal(modalConf.id);
+    }
+
+    async function checkForDefaultCard() {
+        let customerObj = await api.graph.getNode(api.tools.A.info.user, "siblings", { type: "customer" });
+        let defaultCard = {
+            id: customerObj?.info?.third_party?.square?.defaultCard || api.tools.A.info.user.info.third_party?.square?.defaultCard || null,
+            card: null,
+            notSet: false
+        };
+        if (defaultCard.id) {
+            if (api.tools.A?.info?.data?.square?.locationId) {
+                // Get Square account object for this business
+                const squareaccount = await api.graph.getNode(api.tools.A.info.business, "children", { type: "squareaccount" });
+                const listParams = { squareCustomerId: customerObj?.info?.third_party?.square?.id || api.tools.A.info.user.info.third_party.square.id };
+                const cards = await api.graph.callObjectMethod(squareaccount, "listCustomerCards", listParams);
+                const list = Array.isArray(cards) ? cards : (cards?.data || []);
+                list.forEach((c) => {
+                    const isDefault = defaultCard.id != null && String(c.id) === String(defaultCard.id);
+                    if (isDefault) {
+                        defaultCard.card = c;
+                    }
+                });
+            } else {
+                console.error("Error Loading SquareAccount!!!");
+            }
+        } else {
+            defaultCard.notSet = true;
+        }
+
+        return defaultCard;
+    }
+
+    function computeDiscountMeta({ priceCents, discounts }) {
+        let original = Number(priceCents ?? 0);
+        let off = 0;
+
+        if (discounts && discounts.length > 0) {
+            for (let d of discounts) {
+                if (d.type === 'amount') off += Number(d.amount);
+                else if (d.type === 'percent') off += Math.round(original * (Number(d.amount) / 100));
+            }
+        }
+
+        // clamp
+        if (!Number.isFinite(off) || off < 0) off = 0;
+        if (off > original) off = original;
+
+        const finalCents = original - off;
+        const percentOff = original > 0 ? Math.round((off / original) * 100) : 0;
+
+        return {
+            hasDiscount: off > 0,
+            originalCents: original,
+            finalCents,
+            amountOffCents: off,
+            percentOff
+        };
+    }
+
+        
+    function escapeHtml(str) {
+        return String(str ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+
+    const subscriptionsList = document.getElementById('subscription-list');
+    const subscriptionsEmpty = document.getElementById('subscription-empty');
+    const subscriptionsCount = document.getElementById('subscription-count');
+
+    let SPE = setupSubscriptionPlanElement();
+
+    let subscriptionPlans = await api.graph.getNodes(api.tools.A.info.business, "children", {type: "subscriptionPlan"});
+    subscriptionPlans = subscriptionPlans?.objects || subscriptionPlans || []
+
+    await buildSubscriptionPlanElements(subscriptionPlans, SPE);
+
+    let subscriptions = await api.graph.getNodes(api.tools.A.info.user, "children", {type: "subscription"});
+    subscriptions = subscriptions?.objects || subscriptions || []
+
+    console.log("Returned Subscriptions: ", subscriptions);
+
+    let subscriptionModal = api.tools.BM.createModal({
+        id: "subscriptionModal",
+        title: "View Membership",
+        content: ``
+    });
+
+    renderSubscriptions(subscriptions);
+</script>

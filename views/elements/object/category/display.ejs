@@ -1,0 +1,26 @@
+
+
+
+
+
+
+
+
+
+<section class="vw-100 vh-50 mb-2">
+    <!-- Carousel Hero -->
+    <div class="container-fluid mh-100 h-100 overflow-hidden">
+        <%- include('../../media/carousel.ejs', {slideshow: {id: `category-hero-${object.info.uoid}`, title: `${object.info.name}`, description: object.info.description, slides: object.media}}) %>
+    </div>
+</section>
+
+<div class="container-fluid mb-5">
+    <div class="row">
+        <% for (let subObject of Object.values(object?.objects?.[object.info.category_settings.type] || {})) { %>
+        <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
+            <%- include(`../${subObject.info.type}/preview`, { object: subObject }) %>
+        </div>
+        <% } %>
+    </div>
+</div>
+  

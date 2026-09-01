@@ -1,0 +1,41 @@
+
+
+
+
+
+
+
+
+
+<!-- Dynamic Projects Display -->
+<div class="container-fluid h-auto my-2">
+    <% if (objects?.title) { %>
+        <h4 class="pb-2 border-bottom mb-2"><%= titleCase(objects?.title) %></h4>
+    <% } %>
+    
+    <% if (objects?.pagination) { %>
+        <!-- Pagination -->
+        <div class="container-fluid h-auto my-3">
+            <div class="row">
+                <div class="col-12 d-flex justify-content-center">
+                    <%- include('../../utility/pagination.ejs', {pagination: objects.pagination}) %>
+                </div>
+            </div>
+        </div>
+    <% } %>
+
+    <% for (const project of objects?.objects || objects || []) { %>
+        <%- include('./display', { object: project }) %>
+    <% } %>
+
+    <% if (objects?.pagination) { %>
+        <!-- Pagination -->
+        <div class="container-fluid h-auto my-3">
+            <div class="row">
+                <div class="col-12 d-flex justify-content-center">
+                    <%- include('../../utility/pagination.ejs', {pagination: objects.pagination}) %>
+                </div>
+            </div>
+        </div>
+    <% } %>
+</div>

@@ -1,0 +1,57 @@
+<div class="container my-5 py-5" id="overlay-container">
+  <h1 class="orbitron mb-4">Privacy Policy</h1>
+  <p>Last Updated: <%= new Date().toLocaleDateString() %></p>
+
+  <section class="mb-5">
+    <p><%= business.info.name %> ("we", "our", or "us") respects your privacy and is committed to protecting your personal information.  
+    This Privacy Policy explains how we collect, use, and safeguard your data when using <%= app.info.name %> (the "Service").</p>
+  </section>
+
+  <h3>1. Information We Collect</h3>
+  <ul>
+    <li><strong>Account Information:</strong> Name, email, phone number, and login credentials you provide when creating an account.</li>
+    <li><strong>Usage Data:</strong> Information about how you interact with our website and applications, including device type, IP address, and browser details.</li>
+    <li><strong>Payment Information:</strong> Processed securely through third-party providers; we do not store credit card details on our servers.</li>
+  </ul>
+
+  <h3>2. How We Use Your Information</h3>
+  <ul>
+    <li>To operate, maintain, and improve our Service.</li>
+    <li>To provide support and respond to inquiries.</li>
+    <li>To send important updates, account information, and marketing communications (where permitted).</li>
+    <li>To ensure compliance with our Terms of Service and applicable laws.</li>
+  </ul>
+
+  <h3>3. Data Protection</h3>
+  <p>We use industry-standard encryption, secure servers, and regular audits to protect your personal data.  
+  Despite these efforts, no system is 100% secure, and you use the Service at your own risk.</p>
+
+  <h3>4. Cookies & Tracking</h3>
+  <p>We use cookies and similar technologies to remember your preferences and analyze website usage.  
+  You can manage or disable cookies through your browser settings, but some features may not function correctly.</p>
+
+  <h3>5. Third-Party Services</h3>
+  <p>Our Service may integrate with third-party APIs such as Square, Stripe, or Meta for payments, analytics, or social integrations.  
+  These third parties have their own privacy policies, which we encourage you to review.</p>
+
+  <h3>6. Data Retention</h3>
+  <p>We retain personal data only as long as necessary to provide the Service or comply with legal obligations.</p>
+
+  <h3>7. Your Rights</h3>
+  <p>You may request access, correction, or deletion of your data by contacting us.  
+  We will respond to verified requests as required by law.</p>
+
+  <h3>8. Changes to This Policy</h3>
+  <p>We may update this Privacy Policy from time to time. Updates will be posted here, and continued use of the Service indicates acceptance.</p>
+
+  <h3>9. Contact Us</h3>
+  <p>If you have questions about this Privacy Policy, please contact us at:
+    <br/><strong>Email:</strong> <%= page.data.location.info.email || "privacy@" + data.domain %><br/>
+    <strong>Address:</strong> <%= page.data.location.info.address || "Business Address Unavailable" %>
+  </p>
+
+  <hr class="my-5"/>
+  <p class="text-muted small">
+    © <%= new Date().getFullYear() %> <%= business.info.name %>. All rights reserved.
+  </p>
+</div>

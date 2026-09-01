@@ -1,0 +1,64 @@
+
+
+
+
+
+
+
+
+
+<style>
+    .icon-container {
+        width: 100px; /* Adjust size */
+        height: 100px;
+        background-color: #f8f9fa; /* Light background for contrast */
+        border-radius: 50%; /* Makes it circular */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* Soft shadow */
+    }
+
+    .icon-container i {
+        font-size: 50px; /* Adjust icon size */
+        color: #007bff; /* Adjust color to match branding */
+    }
+
+</style>
+
+<%
+// build an array of [key, value] and sort by value.order (missing -> Infinity so missing items go last)
+const entries = Object.entries(preview || {}).sort((a, b) => {
+  const ao = Number.isFinite(Number(a[1].order)) ? Number(a[1].order) : Infinity;
+  const bo = Number.isFinite(Number(b[1].order)) ? Number(b[1].order) : Infinity;
+  return ao - bo; // change to bo - ao for descending
+});
+%>
+
+<div class="container my-5">
+    <div class="swiper swiper-preview">
+        <div class="swiper-wrapper">
+            <% for (let section of entries) { %>
+                <div class="swiper-slide">
+                    <div class="d-flex flex-column align-items-center justify-content-center">
+                        <div class="icon-container">
+                            <i class="<%= section[1].icon %>"></i>
+                        </div>
+                        <!-- <img src="<%= section[1].image %>" alt="<%= section[1].title %>" class="rounded-circle" width="140" height="140"> -->
+                        <div class="d-flex flex-column align-items-center justify-content-center">
+                            <h5 class="my-2"><%= section[1].title %></h5>
+                            <p class="mb-1"><%= section[1].description %></p>
+                            <a href="<%= section[1].link %>" class="btn btn-primary scroll-link">Learn More »</a>
+                        </div>
+                    </div>
+                </div>
+            <% } %>
+        </div>
+        <!-- Swiper Navigation -->
+        <div class="swiper-button-next"></div>
+        <div class="swiper-button-prev"></div>
+
+        <!-- Swiper Pagination -->
+        <div class="swiper-pagination"></div>
+    </div>
+</div>

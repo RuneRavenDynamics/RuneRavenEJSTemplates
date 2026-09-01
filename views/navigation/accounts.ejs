@@ -1,0 +1,31 @@
+
+
+
+
+
+
+
+
+
+<li class="nav-item dropdown ms-auto" id="accounts-dropdown-container">
+    <button
+        class="nav-link dropdown-toggle"
+        href="#"
+        role="button"
+        id="accounts-dropdown"
+        data-bs-toggle="dropdown"
+        aria-expanded="false"
+    >
+        Accounts
+    </button>
+    <ul class="dropdown-menu" aria-labelledby="accounts-dropdown">
+        <% if (session.user) { %>
+        <li><a class="dropdown-item fs-6" href="/account/dashboard">Dashboard</a></li>
+        <li><hr class="dropdown-divider"></li>
+        <li><a class="dropdown-item fs-6" href="/account/logout">Logout</a></li>
+        <% } else { %>
+        <li><a class="dropdown-item fs-6" href="/account/login">Login</a></li>
+        <li><a class="dropdown-item fs-6" href="/account/create">Register</a></li>
+        <% } %>
+    </ul>
+</li>

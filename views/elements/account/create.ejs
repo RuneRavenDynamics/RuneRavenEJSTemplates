@@ -1,0 +1,414 @@
+<style>
+
+    .create-form-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: auto;
+    }
+
+    /* Page layout */
+    .account-card {
+        width: 100%;
+        border-radius: 1rem;
+        box-shadow: 0 10px 30px rgba(16,24,40,.06);
+        overflow: hidden;
+    }
+    .account-card .header {
+        padding: 1.25rem 1.5rem;
+    }
+    .account-card .body { padding: 1.5rem; }
+    .input-icon {
+        width: 42px; display: inline-flex; align-items: center; justify-content: center;
+        background: #f1f5f9; border: 1px solid #e2e8f0; border-right: 0; border-radius: .5rem 0 0 .5rem;
+        color: #0d6efd;
+    }
+    .input-icon + .form-control {
+        border-left: 0; border-radius: 0 .5rem .5rem 0;
+    }
+    .split {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        gap: 3rem;
+    }
+    
+
+    
+
+    #form-container {
+        height: 100%;
+    }
+    
+    /* Details panel */
+    #details-container {
+        height: 100%;
+    }
+    
+    .details-card {
+        border: 1px solid #e9ecef; border-radius: .75rem; padding: 1rem;
+        background: #fafafa;
+    }
+    .details-card h5 { font-weight: 700; }
+
+    #details-body {
+        overflow: auto;
+    }
+
+    .kv-row { display:flex; gap:.5rem; align-items:flex-start; padding:.5rem 0; border-bottom:1px dashed #e5e7eb; }
+    .kv-row:last-child { border-bottom: 0; }
+    .kv-key { min-width: 140px; color:#64748b; font-weight:600;}
+    .kv-val { color:#0f172a; }
+
+    .benefit-icon {
+        inline-size: 2.25rem;
+        block-size: 2.25rem;
+        display: inline-grid;
+        place-items: center;
+        border-radius: 50rem;
+        background: var(--bs-primary-bg-subtle);
+        color: var(--bs-primary);
+        flex: 0 0 auto;
+    }
+    .benefit-item + .benefit-item { border-top: 1px dashed var(--bs-border-color); }
+
+    @media (min-width: 992px) {
+         .split { grid-template-columns: 1fr 420px; } 
+    }
+    
+    @media (max-width: 576px) { 
+
+        .create-form-container {
+            overflow-y: auto;
+            align-items: start;
+        }
+
+        #form-container {
+            height: auto;
+        }
+
+        #details-container {
+            height: auto;
+        }
+
+        #details-body {
+            overflow: visible;
+        }
+
+        .split {
+            flex-direction: column;
+            align-items: start;
+            gap: 3rem;
+        }
+
+        .account-card {
+            overflow: auto;
+            scrollbar-color: var(--bs-primary) var(--bs-primary);
+        }
+    }
+
+  .benefit-item {
+        width: 90%;
+        font-size: .7em;
+    }
+
+    @media (max-width: 768px) {
+
+    }
+
+    @media (max-width: 576px) {
+
+    }
+</style>
+
+<%
+  const raw = page?.info?.content?.account?.details;
+
+  const slug = s => String(s || '')
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '');
+
+  // Normalize to: [{ id, title, detail, icon }]
+  const benefits = (() => {
+    if (!raw) return [];
+
+    // NEW SHAPE: { id: {title, detail, icon}, ... }
+    if (!Array.isArray(raw) && typeof raw === 'object' && Object.values(raw)[0]?.title) {
+      return Object.entries(raw).map(([id, v]) => ({
+        id,
+        title: v.title || '',
+        detail: v.detail || '',
+        icon: v.icon || ''
+      })).filter(x => x.detail);
+    }
+    // ARRAY SHAPES
+    if (Array.isArray(raw)) {
+      return raw.map((item) => {
+        if (typeof item === 'string') {
+          const t = item.split(':')[0] || 'Benefit';
+          return { id: slug(t), title: t, detail: item, icon: '' };
+        }
+        // { title, detail, icon }
+        const t = item.title || item.label || 'Benefit';
+        return { id: slug(t), title: t, detail: item.detail || item.value || '', icon: item.icon || '' };
+      }).filter(x => x.detail);
+    }
+
+    return [];
+  })();
+%>
+
+<div class="create-form-container container" id="overlay-container">
+    <div class="account-card">
+        <% if (content?.title) { %>
+            <div class="header d-flex align-items-center justify-content-center">
+                <h4 class="login-form-title"><%= content.title %></h4>
+            </div>
+        <% } %>
+
+        <div class="body h-90">
+        <div class="split h-90">
+            <!-- Form column -->
+            <div class="col-12 col-lg-6" id="form-container">
+                <form action="https://<%= data.domain %>/account/create" method="post" novalidate>
+                    <div class="row g-3 d-flex align-items-center justify-content-center">
+                        <div class="col-12 col-md-6">
+                            <div class="input-group">
+                                <span class="input-icon"><i class="fa-solid fa-id-card"></i></span>
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="first_name" name="first_name" placeholder="First Name" required autocomplete="given-name">
+                                    <label class="" for="first_name">First Name</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <div class="input-group">
+                                <span class="input-icon"><i class="fa-solid fa-id-card-clip"></i></span>
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="last_name" name="last_name" placeholder="Last Name" required autocomplete="family-name">
+                                    <label class="" for="last_name">Last Name</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="input-group">
+                                <span class="input-icon"><i class="fa-solid fa-envelope"></i></span>
+                                <div class="form-floating">
+                                    <input type="email" class="form-control" id="email" name="email" required autocomplete="email" />
+                                    <label class="" for="email">Email</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="input-group">
+                                <span class="input-icon"><i class="fa-solid fa-phone"></i></span>
+                                <div class="form-floating">
+                                    <input type="tel" class="form-control" id="phone" name="phone" autocomplete="tel" />
+                                    <label class="" for="phone">Phone</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="input-group">
+                                <span class="input-icon"><i class="fa-solid fa-user"></i></span>
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="username" name="username" required autocomplete="username" />
+                                    <label class="" for="username">Username</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <div class="input-group">
+                                <span class="input-icon"><i class="fa-solid fa-lock"></i></span>
+                                <div class="form-floating">
+                                    <input type="password" id="password" name="password" class="form-control" placeholder="Enter password" required autocomplete="new-password" />
+                                    <label class="" for="password">Password</label>
+                                </div>
+                                <button class="btn btn-outline-secondary togglePassword" type="button" aria-label="Show/Hide password">
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <div class="input-group">
+                                <span class="input-icon"><i class="fa-solid fa-lock"></i></span>
+                                <div class="form-floating">
+                                    <input type="password" id="confirm_password" class="form-control" placeholder="Re-enter password" required autocomplete="new-password" />
+                                    <label class="" for="confirm_password">Confirm Password</label>
+                                </div>
+                                <button class="btn btn-outline-secondary togglePassword" type="button" aria-label="Show/Hide password">
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="col-12 d-flex align-items-center gap-2">
+                            <input type="checkbox" id="terms" required />
+                            <label for="terms" class="m-0">I agree to the <a href="/terms" target="_blank" rel="noopener">Terms</a> & <a href="/privacy" target="_blank" rel="noopener">Privacy Policy</a>.</label>
+                        </div>
+
+                        <!-- Hidden container for SecurityManager iframe -->
+                        <div id="bot-security-container" style="position:absolute; width:0; height:0; overflow:hidden;"></div>
+
+                        <div class="col-12 d-grid d-md-flex gap-3 align-items-center justify-content-center">
+                            <button type="submit" id="app-create-account-button" class="btn btn-primary">
+                                <i class="fa-solid fa-user-plus me-2"></i>Create
+                            </button>
+                            <a class="btn btn-outline-secondary" href="https://<%= data.domain %>/account/login">
+                                <i class="fa-solid fa-right-to-bracket me-2"></i>Login
+                            </a>
+                        </div>
+
+                        <%- include('./thirdPartyLogin', { type: "create" }) %>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Details column (conditional) -->
+            <% if (benefits.length) { %>
+                <div class="col-12 col-lg-5" id="details-container">
+                    <hr class="d-lg-none my-3">
+                    <div class="benefits-sticky h-100">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-header me-2">
+                            <span class="badge text-bg-primary">Account Benefits</span>
+                        </div>
+                        <div class="card-body pt-2 h-90" id="details-body">
+                            <% benefits.forEach(b => { %>
+                                <div class="benefit-item py-3 d-flex gap-3 align-items-start">
+                                <span class="benefit-icon" aria-hidden="true">
+                                    <i class="<%= b.icon %>"></i>
+                                </span>
+                                <div class="flex-grow-1">
+                                    <% if (b.title) { %>
+                                    <div class="fw-semibold"><%= b.title %></div>
+                                    <% } %>
+                                    <div class="text-body-secondary"><%= b.detail %></div>
+                                </div>
+                                </div>
+                            <% }) %>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+            <% } %>
+        </div>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { api } from "https://cdn.runeravendynamics.com/clientapi/latest/api.bundle.js";
+
+    await api.initialize();
+
+    let submitting = false;
+
+    const form = document.querySelector('.account-card form');
+    const submitBtn = document.querySelector('#app-create-account-button');
+
+    // SETUP SECURITY MANAGER
+    if (api.tools?.SCM) {
+        try {
+            api.tools.SCM.createIframe('#bot-security-container');
+        } catch (err) {
+            console.error('Failed to initialize SecurityManager:', err);
+        }
+    } else {
+        console.error('api.tools.SCM is not available');
+    }
+
+    // Toggle password visibility
+    document.querySelectorAll(".togglePassword").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const input = btn.previousElementSibling; // the password input
+        const icon = btn.querySelector("i");
+        const isPwd = input.type === "password";
+        input.type = isPwd ? "text" : "password";
+        icon.classList.toggle("fa-eye", !isPwd);
+        icon.classList.toggle("fa-eye-slash", isPwd);
+      });
+    });
+
+    // Client-side validation + loader
+    submitBtn.addEventListener('click', async (e) => {
+        e.preventDefault();
+
+        const pwdEl = document.querySelector('#password');
+        const confEl = document.querySelector('#confirm_password');
+
+        if (submitting) return;
+            
+        api.tools.LM.load(true);
+
+        // Clear previous custom validity
+        pwdEl.setCustomValidity('');
+        confEl.setCustomValidity('');
+
+        if (!form.checkValidity()) {
+            api.tools.LM.load(false);
+            form.reportValidity();
+            return;
+        }
+
+        if (pwdEl.value !== confEl.value) {
+            api.tools.LM.load(false);
+            confEl.setCustomValidity("Passwords must match.");
+            confEl.reportValidity();
+            return;
+        }
+
+        // Optional: simple strength hint
+        if (pwdEl.value.length < 8) {
+            api.tools.LM.load(false);
+            pwdEl.setCustomValidity("Use at least 8 characters.");
+            pwdEl.reportValidity();
+            return;
+        }
+
+        if (!api.tools?.SCM) {
+            api.tools.LM.load(false);
+            alert('Security verification is unavailable right now. Please reload the page and try again in a moment.');
+            return;
+        }
+
+        if (!api.tools.SCM?.ready) {
+            api.tools.LM.load(false);
+            alert('Security check is still loading. Please wait a moment and try again.');
+            return;
+        }
+
+        submitting = true;
+        submitBtn.disabled = true;
+
+        try {
+            const result = await api.tools.SCM.execute();
+
+            if (!result?.human) {
+                api.tools.SCM.reset();
+                alert('Bot verification failed. Please try again.');
+                return;
+            }
+            
+            form.submit();
+        } catch (err) {
+            console.error('Bot verification failed:', err);
+            api.tools.SCM.reset();
+            api.tools.LM.load(false);
+            alert('Security verification failed. Please try again.');
+        } finally {
+            submitting = false;
+            submitBtn.disabled = false;
+        }
+    });
+</script>

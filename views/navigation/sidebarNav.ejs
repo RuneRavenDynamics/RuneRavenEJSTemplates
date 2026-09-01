@@ -1,0 +1,43 @@
+
+
+
+
+
+
+
+
+
+<% 
+  let navigation = page.info.page_settings.content.navigation || page.module.info.module_settings.content.navigation;
+  let pageURL = data.url;
+%>
+
+<nav class="nav nav-pills flex-column gap-2" id="navigation-main">
+    <% if (page.info.page_options.accounts) { %>
+      <%- include('./accounts.ejs') %>
+    <% } %>
+
+  <% if (navigation && navigation.links) { %>
+    <% navigation.links.forEach(link => { %>
+      <% if (link?.type === 'element_id') { %>
+          <a
+            href="#<%= link.element_id %>"
+            class="nav-link d-flex align-items-center scroll-link fs-6"
+          >
+        <% } else { %>
+          <a
+            href="<%= link.url %>"
+            class="nav-link d-flex align-items-center fs-6 <%= link.url === data.url ? 'active' : '' %>"
+          >
+        <% } %>
+        <% if (link.icon) { %>
+          <i class="<%= link.icon %> me-2"></i>
+        <% } %>
+        <span><%= link.text %></span>
+      </a>
+    <% }) %>
+  <% } %>
+
+    <!-- Include the theme toggler -->
+    <%- include('./themeToggler.ejs') %>
+</nav>

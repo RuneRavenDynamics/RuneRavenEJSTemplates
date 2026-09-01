@@ -1,0 +1,38 @@
+<!-- inside #billing-tab-pane ... -->
+<div class="container my-3">
+  <div class="card shadow">
+    <div class="card-header text-white">
+      <h3 class="mb-0">Billing</h3>
+    </div>
+    <div class="card-body">
+
+    </div>
+  </div>
+</div>
+
+<script type="module">
+    import { api } from "https://cdn.runeravendynamics.com/clientapi/latest/api.bundle.js";
+
+    await api.initialize();
+
+    const billingPane = document.querySelector("#billing-tab-pane .card-body");
+
+    // Get Square account object for this business
+    const squareaccount = await api.graph.getNode(api.tools.A.info.business, "children", { type: "squareaccount" });
+
+    if (squareaccount && squareaccount?.info) {
+        
+        let customerObj = await api.graph.getNode(api.tools.A.info.user, "siblings", { type: "customer" });
+
+        await api.tools.FM.buildSquareCustomerCardsElement({
+            parent: billingPane,
+            customer: customerObj,
+            account: api.tools.A.info.user,
+            squareaccount: squareaccount,
+        });
+
+      
+    } else {
+      console.log("No Square Account Provided...");
+    }
+</script>

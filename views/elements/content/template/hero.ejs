@@ -1,0 +1,26 @@
+
+
+
+
+
+
+
+
+
+<section class="vw-100 mb-2" id="<%= elementId %>" style="<%= formatElementStyles(element.styles || []) %>" <%= typeof scrollElement !== 'undefined' && scrollElement ? 'data-scroll-section' : '' %>>
+    <!-- Hero -->
+    <div class="container-fluid mh-100 h-100 overflow-hidden">
+        <%- include('../../display/hero', {
+            hero: {
+                id: `business-hero-${elementId}`,
+                type: element.template.options.type,
+                title: element.template.options?.title || null,
+                subtitle: element.template.options?.subtitle || null,
+                message: element.template.options?.message || null,
+                media: element.template.options?.media || null,
+                buttons: element.template.options?.buttons || []
+            }
+        }) %>
+    </div>
+
+</section>

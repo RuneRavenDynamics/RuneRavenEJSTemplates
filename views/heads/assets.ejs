@@ -1,0 +1,44 @@
+<%
+    const applicationFiles = app?.info?.application_files || {};
+    const files = Object.values(applicationFiles);
+
+    const getSize = (name) => {
+        const match = name?.match?.(/(\d+x\d+)/);
+        return match ? match[1] : null;
+    };
+%>
+
+<% for (const file of files) { %>
+    <%
+        const originalName = file.originalName;
+        const url = file.url;
+        const contentType = file.contentType || "";
+
+        if (!originalName || !url) continue;
+
+        const isIconImage = /\.(png|jpg|jpeg|svg|webp|ico)$/i.test(originalName);
+        const isManifest = originalName === "manifest.webmanifest" || originalName === "site.webmanifest";
+        const isBrowserConfig = originalName === "browserconfig.xml";
+        const size = getSize(originalName);
+    %>
+
+    <% if (isIconImage) { %>
+        <% if (originalName === "favicon.ico") { %>
+            <link rel="icon" href="<%= url %>">
+            <link rel="shortcut icon" href="<%= url %>">
+        <% } else if (originalName.includes("apple-touch-icon")) { %>
+            <link rel="apple-touch-icon"<%= size ? ` sizes="${size}"` : "" %> href="<%= url %>">
+        <% } else { %>
+            <link rel="icon"<%= size ? ` sizes="${size}"` : "" %> type="<%= contentType %>" href="<%= url %>">
+        <% } %>
+    <% } %>
+
+    <% if (isBrowserConfig) { %>
+        <meta name="msapplication-config" content="<%= url %>">
+    <% } %>
+<% } %>
+
+<meta name="theme-color" content="#ffffff">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">

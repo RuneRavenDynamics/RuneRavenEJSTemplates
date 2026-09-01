@@ -1,0 +1,132 @@
+
+
+
+
+
+
+
+
+
+<style>
+    /* Base Dashboard Styles */
+
+    .dashboard {
+        height: 100%;
+        padding: 0;
+    }
+
+    .dashboard-nav-bar {
+        background: linear-gradient(to right, var(--bs-primary), var(--bs-secondary));
+    }
+
+    .dashboard-nav-bar .nav-link {
+        color: white;
+    }
+
+    .dashboard-tab-content {
+        height: 100%;
+    }
+
+    table caption {
+        font-size: 1.5em;
+        color: white;
+    }
+
+    .tab-pane {
+        height: 100%;
+        overflow-y: auto;
+        scrollbar-width: thin;
+    }
+
+
+</style>
+
+<div class="container-fluid dashboard vh-90" data-scroll-section>
+
+    <nav class="navbar navbar-expand-lg dashboard-nav-bar">
+        <div class="container-fluid justify-content-start">
+            <a class="navbar-brand" style="color: white;" href="#">
+                <img src="<%= business.info.logo %>" alt="Logo" width="40" height="40" class="d-inline-block align-text-top">
+                <%= business.info.name %>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="nav nav-pills nav-fill" id="myTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home-tab-pane" type="button" role="tab" aria-controls="home-tab-pane" aria-selected="true">HOME</button>
+                    </li>
+                    <% if (page?.info?.page_settings?.content?.dashboard?.sections) { %>
+                        <% Object.entries(page.info.page_settings.content.dashboard.sections).forEach(([id, section]) => { %>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" style="text-transform: uppercase;" id="<%= id %>-tab" data-bs-toggle="tab" data-bs-target="#<%= id %>-tab-pane" type="button" role="tab" aria-controls="<%= id %>-tab-pane" aria-selected="false"><%= section.title %></button>
+                            </li>
+                        <% }) %>
+                    <% } %>
+                    <!--
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="billing-tab" data-bs-toggle="tab" data-bs-target="#billing-tab-pane" type="button" role="tab" aria-controls="billing-tab-pane" aria-selected="false">BILLING</button>
+                    </li>
+                    -->
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="account-tab" data-bs-toggle="tab" data-bs-target="#account-tab-pane" type="button" role="tab" aria-controls="account-tab-pane" aria-selected="false" >ACCOUNT</button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="tab-content p-3 dashboard-tab-content" id="myTabContent">
+
+        <div class="h-100 tab-pane fade show active" id="home-tab-pane" role="tabpanel" aria-labelledby="home-tab" tabindex="0">
+            <%- include("../../elements/account/notification"); %>
+        </div>
+
+
+        <% if (page?.info?.page_settings?.content?.dashboard?.sections) { %>
+            <% Object.entries(page.info.page_settings.content.dashboard.sections).forEach(([id, section]) => { %>
+                <div class="h-100 tab-pane fade" id="<%= id %>-tab-pane" role="tabpanel" aria-labelledby="<%= id %>-tab" tabindex="0">
+                    <% if (section.template) { %>
+                        <%- include(`../../elements/account/${section.template}`); %>
+                    <% } %>
+                </div>
+            <% }) %>
+        <% } %>
+        
+        <!--
+        <div class="tab-pane fade" id="billing-tab-pane" role="tabpanel" aria-labelledby="billing-tab" tabindex="0">
+            <%- //include("./sections/billing"); %>
+        </div>
+        -->
+        
+        <div class="h-100 tab-pane fade" id="account-tab-pane" role="tabpanel" aria-labelledby="account-tab" tabindex="0">
+            <%- include("../../elements/account/update"); %>
+        </div>
+
+    </div>
+</div>
+
+<script type="module">
+    import { api } from "https://cdn.runeravendynamics.com/clientapi/latest/api.bundle.js";
+
+    await api.initialize();
+
+    class Dashboard {
+        constructor() {
+            this.initialize();
+        }
+
+        async initialize() {
+            this.setupDOM();
+        }
+
+        setupDOM() {
+            this.nav = document.querySelector('.dashboard-nav-bar');
+
+        }
+    }
+
+    const dashboard = new Dashboard();
+    window.dashboard = dashboard;
+</script>

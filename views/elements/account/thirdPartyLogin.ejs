@@ -1,0 +1,113 @@
+<style>
+  .oauth-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .75rem;
+    width: 100%;
+    max-width: 540px;
+    align-self: center;
+    justify-self: center;
+    margin: 15px;
+  }
+
+  .btn-oauth {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .6rem;
+    width: 100%;
+    padding: 0.65rem 1.1rem;
+    border: 0;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: .95rem;
+    letter-spacing: .2px;
+    cursor: pointer;
+    transition: transform .12s ease, box-shadow .18s ease, filter .18s ease;
+    will-change: transform, box-shadow, filter;
+  }
+  .btn-oauth:hover { transform: translateY(-1px); box-shadow: 0 6px 14px rgba(0,0,0,.12); }
+  .btn-oauth:active { transform: translateY(0); box-shadow: none; }
+
+  /* Facebook */
+  .btn-meta {
+    color: #fff;
+    background: linear-gradient(135deg, #1877F2, #3B82F6);
+  }
+  .btn-meta .icon { fill: #fff; }
+
+  /* Google: neutral per brand rules */
+  .btn-google {
+    color: #1f2937; /* slate-800 */
+    background: #fff;
+    border: 1px solid #e5e7eb; /* gray-200 */
+  }
+  .btn-google:hover { filter: brightness(0.98); }
+  .btn-google .icon { width: 18px; height: 18px; }
+
+  .icon { width: 20px; height: 20px; flex-shrink: 0; }
+</style>
+
+<div class="oauth-row" id="oauth-row">
+  <!-- Facebook -->
+  <button class="btn-oauth btn-meta" id="oauth-fb" type="button" aria-label="Continue with Facebook">
+    <!-- FB glyph -->
+    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M22 12.06C22 6.48 17.52 2 11.94 2S2 6.48 2 12.06c0 5 3.66 9.15 8.44 9.94v-7.03H8.1v-2.9h2.34V9.41c0-2.31 1.37-3.59 3.47-3.59.99 0 2.02.18 2.02.18v2.22h-1.14c-1.12 0-1.47.69-1.47 1.39v1.67h2.51l-.4 2.9h-2.11V22c4.78-.79 8.44-4.95 8.44-9.94z"/>
+    </svg>
+    <span><% if (type === "login") { %>Login with Facebook<% } else { %>Create with Facebook<% } %></span>
+  </button>
+
+  <!-- Google -->
+  <button class="btn-oauth btn-google" id="oauth-google" type="button" aria-label="Continue with Google">
+    <!-- Google "G" (brand-compliant multi-color path) -->
+    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+      <path fill="#EA4335" d="M12 10.2v3.9h5.5c-.24 1.3-1.67 3.8-5.5 3.8-3.31 0-6-2.7-6-6s2.69-6 6-6c1.89 0 3.16.81 3.89 1.5l2.65-2.56C16.88 3.01 14.61 2 12 2 6.48 2 2 6.48 2 12s4.48 10 10 10c5.76 0 9.56-4.04 9.56-9.73 0-.65-.07-1.15-.16-1.65H12z"/>
+      <path fill="#34A853" d="M3.88 7.36l3.2 2.35C7.8 8.19 9.72 6.8 12 6.8c1.89 0 3.16.81 3.89 1.5l2.65-2.56C16.88 3.01 14.61 2 12 2 8.41 2 5.35 4.04 3.88 7.36z" opacity=".001"/><!-- invisible filler to keep paths tidy -->
+      <path fill="#FBBC05" d="M12 22c2.97 0 5.47-.98 7.29-2.66l-3.35-2.74c-.9.62-2.07 1.05-3.94 1.05-3 0-5.54-2.03-6.45-4.77H2.09v2.98C3.9 19.69 7.62 22 12 22z"/>
+      <path fill="#4285F4" d="M21.56 12.27c0-.65-.07-1.15-.16-1.65H12v3.9h5.5c-.24 1.3-1.67 3.8-5.5 3.8-1.96 0-3.62-.65-4.86-1.76v2.98C8.86 20.97 10.36 22 12 22c5.76 0 9.56-4.04 9.56-9.73z"/>
+      <path fill="#34A853" d="M7.14 15.56A5.98 5.98 0 0 1 6 12c0-1.03.27-2 .74-2.86V6.16H2.09A9.96 9.96 0 0 0 2 12c0 1.6.38 3.11 1.09 4.45l4.05-3z"/>
+      <path fill="#EA4335" d="M12 6.8c1.89 0 3.16.81 3.89 1.5l2.65-2.56C16.88 3.01 14.61 2 12 2 8.41 2 5.35 4.04 3.88 7.36l3.2 2.35C7.8 8.19 9.72 6.8 12 6.8z"/>
+      <path fill="#34A853" d="M12 22c2.97 0 5.47-.98 7.29-2.66l-3.35-2.74c-.9.62-2.07 1.05-3.94 1.05-3 0-5.54-2.03-6.45-4.77H2.09v2.98C3.9 19.69 7.62 22 12 22z" opacity=".001"/>
+    </svg>
+    <span><% if (type === "login") { %>Login with Google<% } else { %>Create with Google<% } %></span>
+  </button>
+</div>
+
+<script type="module">
+    import { api } from "https://cdn.runeravendynamics.com/clientapi/latest/api.bundle.js";
+
+    await api.initialize();
+
+    const type = "<%= type %>"; // "login" or "create"
+
+    async function startOAuth(org) {
+      try {
+        api.tools.LM.load(true);
+        await api.graph.callObjectClientMethod(
+          api.app.data.app,
+          api.app.data.app.settings.clientMethods.loginWithThirdParty,
+          { org, type }
+        );
+      } finally {
+        api.tools.LM.load(false);
+      }
+    }
+
+    document.getElementById('oauth-fb')?.addEventListener('click', () => startOAuth('meta.facebook'));
+    document.getElementById('oauth-google')?.addEventListener('click', () => startOAuth('google'));
+
+    // keyboard support if needed (Enter/Space)
+    function keyActivate(btn, org) {
+      btn.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          startOAuth(org);
+        }
+      });
+    }
+    const fbBtn = document.getElementById('oauth-fb');
+    const gBtn  = document.getElementById('oauth-google');
+    if (fbBtn) keyActivate(fbBtn, 'meta.facebook');
+    if (gBtn)  keyActivate(gBtn, 'google');
+</script>

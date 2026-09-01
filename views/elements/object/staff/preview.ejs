@@ -1,0 +1,28 @@
+
+
+
+
+
+
+
+
+
+<div class="card h-100 shadow-sm text-center border-0">
+    <% if (object.info.headshot) { %>
+        <img src="<%= object.info.headshot %>" alt="<%= object.info.name %>" class="card-img-top object-fit-cover rounded-top" style="height: 250px;">
+    <% } else { %>
+        <div class="bg-secondary-subtle d-flex align-items-center justify-content-center" style="height: 250px;">
+        <i class="bi bi-person-circle fs-1 text-muted"></i>
+        </div>
+    <% } %>
+
+    <div class="card-body">
+        <h5 class="card-title mb-1"><%= object.info.name || 'Team Member' %></h5>
+        <% if (object.info.position) { %>
+        <p class="text-muted mb-2"><%= object.info.position %></p>
+        <% } %>
+        <% if (object.info.description) { %>
+        <p class="small text-muted"><%= object.info.description %></p>
+        <% } %>
+    </div>
+</div>

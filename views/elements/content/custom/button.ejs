@@ -1,0 +1,17 @@
+
+
+
+
+
+
+
+
+
+<a 
+    id="<%= elementId %>"
+    style="<%= formatElementStyles(element.styles || []) %>"
+    href='<%= (element.element.options.type === 'scroll-link' ? `#${element.element.options.element_id}` : element.element.options.url) %>'
+    <%= typeof scrollElement !== 'undefined' && scrollElement ? 'data-scroll-section' : '' %>
+    >
+    <%= element.element.options.text %>
+</a>

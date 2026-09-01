@@ -1,0 +1,160 @@
+
+
+
+
+
+
+
+
+
+<style>
+    .swiper-timeline {
+        width: 100%;
+        padding: 20px 0;
+    }
+
+    .swiper-slide {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .swiper-button-next,
+    .swiper-button-prev {
+        color: #007bff;
+    }
+
+    .swiper-pagination-bullet-active {
+        background: #007bff;
+    }
+
+</style>
+
+<% if (business.info.about) { %>
+
+    <section class="container mb-5" id="<%= elementId %>" style="<%= formatElementStyles(element.styles || []) %>" <%= typeof scrollElement !== 'undefined' && scrollElement ? 'data-scroll-section' : '' %>>
+        <div class="row gy-5">
+            <!-- About Section -->
+            <div class="col-md-12">
+        
+                <div class="row gt-5 mt-5 d-flex align-items-center justify-content-between">
+                    <div class="col-md-6 parallax-up">
+                        <% if (business.info.about.description) { %>
+                            <h3 class="my-2">About Us</h3>
+                            <p class="mb-2"><%= business.info.about.description %></p>
+                        <% } %>
+
+                        <% if (business.info.about.long_description) { %>
+                            <p class="my-4"><%= business.info.about.long_description %></p>
+                        <% } %>
+                    </div>
+
+                    <div class="col-md-6 parallax-up p-5">
+                        <!-- Media Section as a Swiper Slider -->
+                        <% if (business.info.about.media && Object.keys(business.info.about.media).length > 0) { %>
+                            <div class="swiper swiper-media">
+                                <div class="swiper-wrapper">
+                                    <% for (const [key, media] of Object.entries(business.info.about.media)) { %>
+                                        <div class="swiper-slide">
+                                            <img src="<%= media %>" alt="<%= key %>" class="img-fluid rounded shadow" loading="lazy">
+                                            <div class="swiper-lazy-preloader"></div>
+                                        </div>
+                                    <% } %>
+                                </div>
+
+                                <!-- Swiper Navigation -->
+                                <div class="swiper-button-next"></div>
+                                <div class="swiper-button-prev"></div>
+
+                                <!-- Swiper Pagination -->
+                                <div class="swiper-pagination"></div>
+                            </div>
+                        <% } %>
+                    </div>
+                </div>
+                <div class="row gb-3 mb-2">
+                    <div class="col-md-12 parallax-up">
+                        <% if (business.info.about.mission) { %>
+                            <h4 class="my-2">Our Mission</h4>
+                            <p class="mb-4"><%= business.info.about.mission %></p>
+                        <% } %>
+
+                        <% if (business.info.about.vision) { %>
+                            <h4 class="my-2">Our Vision</h4>
+                            <p class="mb-4"><%= business.info.about.vision %></p>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row gy-3 mb-2">
+            <div class="col-md-12">
+                <div class="row gy-3">
+                    <div class="col-md-12 parallax-up">
+                        <!-- Core Values Section -->
+                        <% if (business.info.about.values && Object.keys(business.info.about.values).length > 0) { %>
+                            <h4>Our Core Values</h4>
+                            <ul class="list-group">
+                                <% for (const [key, value] of Object.entries(business.info.about.values)) { %>
+                                    <li class="list-group-item"><strong><%= key %>:</strong> <%= value %></li>
+                                <% } %>
+                            </ul>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row gb-5 mb-5">
+            <div class="col-md-12">
+                <div class="row gy-5 mb-5">    
+                    <div class="col-md-12 parallax-up gsap-fade">
+                        <!-- History Section -->
+                        <% if (business.info.about.history) { %>
+                            <% if (business.info.about.history.summary) { %>
+                                <h4>Our History</h4>
+                                <p><%= business.info.about.history.summary %></p>
+                            <% } %>
+
+                            <!-- History Timeline as a Swiper Slider -->
+                            <% if (business.info.about.history && business.info.about.history.timeline && Object.keys(business.info.about.history.timeline).length > 0) { %>
+
+                                <div class="swiper swiper-timeline">
+                                    <div class="swiper-wrapper">
+                                        <% for (const event of business.info.about.history.timeline) { %>
+                                            <div class="swiper-slide">
+                                                <div class="card shadow-sm p-3">
+                                                    <div class="card-body text-center">
+                                                        <h5 class="card-title text-primary"><%= event.date %></h5>
+                                                        <p class="card-text"><%= event.description %></p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        <% } %>
+                                    </div>
+
+                                    <!-- Swiper Navigation Buttons -->
+                                    <div class="swiper-button-next"></div>
+                                    <div class="swiper-button-prev"></div>
+
+                                    <!-- Swiper Pagination -->
+                                    <div class="swiper-pagination"></div>
+                                </div>
+                            <% } %>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+<% } else { %>
+    <p>No business information available.</p>
+<% } %>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", async () => {
+        
+    });
+</script>

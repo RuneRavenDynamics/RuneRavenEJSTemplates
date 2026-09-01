@@ -1,0 +1,227 @@
+
+
+
+
+
+
+
+
+<% let pageTheme = data.theme; %>
+<script>
+    // Color hex to RGB converter
+    function hexToRgb(hex) {
+        hex = hex.replace(/^#/, '');
+        if (hex.length === 3) {
+            hex = hex.split('').map(c => c + c).join('');
+        }
+        const bigint = parseInt(hex, 16);
+        const r = (bigint >> 16) & 255;
+        const g = (bigint >> 8) & 255;
+        const b = bigint & 255;
+        return `${r}, ${g}, ${b}`;
+    }
+
+    function generateThemeCss(brandTheme) {
+        const light = brandTheme.themes.light || {};
+        const dark = brandTheme.themes.dark || {};
+        const fonts = brandTheme.fonts || {};
+
+        const themeVars = (themeObj, mode) => {
+            const colorVars = [
+                ['--bs-primary', themeObj.color_primary],
+                ['--bs-secondary', themeObj.color_secondary],
+                ['--bs-secondary-color', themeObj.color_secondary],
+                ['--bs-accent', themeObj.color_accent],
+                ['--bs-emphasis-color', themeObj.color_emphasis],
+                ['--bs-body-bg', themeObj.color_background],
+                ['--bs-body-color', themeObj.color_text],
+                ['--bs-link-color', themeObj.color_link],
+                ['--bs-heading-color', themeObj.color_header],
+                ['--bs-border-color', themeObj.color_border],
+            ];
+
+            return colorVars.map(([name, value]) => {
+                if (!value) return '';
+                const rgbName = name + '-rgb';
+                const rgbVal = hexToRgb(value);
+                return `    ${name}: ${value};\n    ${rgbName}: ${rgbVal};`;
+            }).filter(Boolean).join('\n');
+        };
+
+        const fontVars = [
+            ['--font-primary', fonts.font_primary],
+            ['--font-secondary', fonts.font_secondary],
+            ['--header-font', fonts.font_header],
+            ['--body-font', fonts.font_body],
+            ['--link-font', fonts.font_link],
+            ['--header-font-weight', fonts.font_header_weight],
+            ['--body-font-weight', fonts.font_body_weight],
+            ['--link-font-weight', fonts.font_link_weight],
+        ].map(([name, value]) => value ? `    ${name}: ${value};` : '').join('\n');
+
+        return `
+                :root {
+            ${themeVars(dark)}
+            ${fontVars}
+                }
+
+                [data-bs-theme="dark"] {
+            ${themeVars(dark)}
+            ${fontVars}
+                }
+
+                [data-bs-theme="light"] {
+            ${themeVars(light)}
+            ${fontVars}
+                }
+        `;
+    }
+</script>
+
+<script>
+    (() => {
+        'use strict'
+    
+        const getStoredTheme = () => localStorage.getItem('theme')
+        const setStoredTheme = theme => localStorage.setItem('theme', theme)
+    
+        const getPreferredTheme = () => {
+            const storedTheme = getStoredTheme();
+            
+            // If theme definitions changed, you could wipe this manually:
+            if (!['light', 'dark', 'auto'].includes(storedTheme)) {
+                localStorage.removeItem('theme');
+                return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+
+            return storedTheme;
+        }
+    
+        const setTheme = theme => {
+            if (theme === 'auto') {
+                document.documentElement.setAttribute('data-bs-theme', (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'))
+            } else {
+                document.documentElement.setAttribute('data-bs-theme', theme)
+            }
+        }
+    
+        setTheme(getPreferredTheme())
+        
+        let currentThemeIconClass = 'bi-moon-stars-fill';
+    
+        const showActiveTheme = (theme, focus = false) => {
+            const themeSwitcher = document.querySelector('#bd-theme')
+        
+            if (!themeSwitcher) {
+                return
+            }
+        
+            const themeSwitcherText = document.querySelector('#bd-theme-text')
+            const activeThemeIcon = document.querySelector('.theme-icon-active')
+            const btnToActive = document.querySelector(`[data-bs-theme-value="${theme}"]`)
+            const classOfActive = btnToActive.querySelector('i').getAttribute('data-icon-class');
+        
+            document.querySelectorAll('[data-bs-theme-value]').forEach(element => {
+                element.classList.remove('active')
+                element.setAttribute('aria-pressed', 'false')
+            })
+        
+            btnToActive.classList.add('active')
+            btnToActive.setAttribute('aria-pressed', 'true')
+            
+            activeThemeIcon.classList.remove(currentThemeIconClass)
+            activeThemeIcon.classList.add(classOfActive)
+            currentThemeIconClass = classOfActive;
+
+            const themeSwitcherLabel = `${themeSwitcherText.textContent} (${btnToActive.dataset.bsThemeValue})`
+            themeSwitcher.setAttribute('aria-label', themeSwitcherLabel)
+        
+            if (focus) {
+                themeSwitcher.focus()
+            }
+        }
+    
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+            const storedTheme = getStoredTheme()
+            if (storedTheme !== 'light' && storedTheme !== 'dark') {
+                setTheme(getPreferredTheme())
+            }
+        })
+    
+        window.addEventListener('DOMContentLoaded', () => {
+        showActiveTheme(getPreferredTheme())
+    
+        document.querySelectorAll('[data-bs-theme-value]')
+            .forEach(toggle => {
+                toggle.addEventListener('click', () => {
+                    const theme = toggle.getAttribute('data-bs-theme-value')
+                    setStoredTheme(theme)
+                    setTheme(theme)
+                    showActiveTheme(theme, true)
+                })
+            })
+        })
+    })()
+</script>
+
+<% if (pageTheme) { %>
+    <script type="module">
+        import { api } from "https://cdn.runeravendynamics.com/clientapi/latest/api.bundle.js";
+
+        await api.initialize();
+
+        let fontPrimary = "<%- pageTheme.fonts.font_primary %>";
+        let fontSecondary = "<%- pageTheme.fonts.font_secondary %>";
+        let fontHeader = "<%- pageTheme.fonts.font_header %>";
+        let fontBody = "<%- pageTheme.fonts.font_body %>";
+        let fontLink = "<%- pageTheme.fonts.font_link %>";
+
+        try {
+            api.tools.TM.load(fontPrimary);
+
+            api.tools.TM.load(fontSecondary);
+
+            api.tools.TM.load(fontHeader);
+
+            api.tools.TM.load(fontBody);
+
+            api.tools.TM.load(fontLink);
+
+            console.log('Fonts loaded:', fontPrimary, fontSecondary);
+        } catch (error) {
+            console.error('Error loading fonts:', error);
+        }
+
+        const styleTag = document.createElement('style');
+        styleTag.innerHTML = generateThemeCss(<%- JSON.stringify(pageTheme) %>);
+        document.head.appendChild(styleTag);
+    </script>
+
+    <style>
+        ::-webkit-scrollbar {
+            width: 8px;       /* scrollbar width */
+        }
+        ::-webkit-scrollbar-thumb {
+            background-color: <%= pageTheme.themes.light.color_primary %>; /* color of the scroll thumb */
+            border-radius: 4px;       /* rounded corners */
+        }
+        ::-webkit-scrollbar-track {
+            background: <%= pageTheme.themes.light.color_background %>;      /* track color */
+        }
+
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: var(--header-font);
+            font-weight: var(--header-font-weight);
+        }
+        body {
+            font-family: var(--body-font);
+            font-weight: var(--body-font-weight);
+        }
+        a {
+            font-family: var(--link-font);
+            font-weight: var(--link-font-weight);
+        }
+    </style>
+<% } %>
+

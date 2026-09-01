@@ -1,0 +1,33 @@
+
+
+
+
+
+
+
+
+
+<% const hero = page.info.content.hero || {}; %>
+<section class="vw-100 vh-100" data-scroll-section>
+    <div class="container col-xxl-8 px-4 py-5 my-5">
+        <div class="row flex-lg-row-reverse align-items-center g-5 py-5 my-4">
+            <div class="col-10 col-sm-8 col-lg-6">
+                <img src="<%= (hero && hero.image) ? hero.image : business.info.logo %>" class="d-block mx-lg-auto img-fluid" alt="<%= (hero && hero.title) ? hero.title : business.info.name %>" width="700" height="500" loading="lazy">
+            </div>
+            <div class="col-lg-6">
+                <h1 class="display-5 fw-bold text-body-emphasis lh-1 mb-3"><%= (hero && hero.title) ? hero.title : business.info.name %></h1>
+                <p class="lead"><%= (hero && hero.message) ? hero.message : business.info.description %></p>
+                <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+                    <% if (hero && hero.buttons) { %>
+                        <% hero.buttons.forEach(button => { %>
+                            <button type="button" class="btn btn-primary btn-lg px-4 me-md-2" id="<%= button.id %>"><%= button.text %></button>
+                        <% }) %>
+                    <% } else { %>
+                        <a href="/contact" class="btn btn-primary btn-lg px-4 me-md-2">Contact Us</a>
+                        <a href="/about" class="btn btn-primary btn-lg px-4 me-md-2">Learn More</a>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

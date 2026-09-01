@@ -1,0 +1,215 @@
+
+
+
+
+
+
+
+
+
+<div class="container my-3">
+    <div class="card shadow">
+        <div class="card-header text-white">
+            <h3 class="mb-0">Account Settings</h3>
+        </div>
+        <div class="card-body" id="account-settings-form-container">
+
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { api } from "https://cdn.runeravendynamics.com/clientapi/latest/api.bundle.js";
+
+    await api.initialize();
+
+    let formContainer = document.querySelector('#account-settings-form-container');
+
+    formContainer.innerHTML = ``;
+
+    let settingsContent = {
+        facebook: {},
+        google: {},
+    }
+
+    if (api.tools.A.info.user?.info?.third_party?.meta?.facebook) {
+        settingsContent.facebook = {
+            linked: true,
+            name: api.tools.A.info.user.info.third_party.meta.facebook?.name || null,
+            email: api.tools.A.info.user.info.third_party.meta.facebook?.email || null,
+        }
+    }
+
+    if (api.tools.A.info.user?.info?.third_party?.google) {
+        settingsContent.google = {
+            linked: true,
+            name: api.tools.A.info.user.info.third_party.google?.name || null,
+            email: api.tools.A.info.user.info.third_party.google?.email || null,
+        }
+    }
+
+    let linkedAccountSettingsForm = await api.elements.element({
+        api: "runeraven",
+        element: "object",
+        id: "linked_accounts",
+        content: settingsContent,
+        property: {
+            properties: {
+                facebook: {
+                    element: {
+                        element: "object",
+                        settings: {
+                            buttons: [
+                                {
+                                    type: "button",
+                                    HTML: "Link Facebook Account",
+                                    className: "btn-primary",
+                                    callback: async () => {
+                                        api.tools.LM.load(true);
+                                        let result = await api.graph.callObjectClientMethod(api.tools.A.info.app, api.tools.A.info.app.settings.clientMethods.loginWithThirdParty, {
+                                            org: 'meta.facebook',
+                                            type: "create",
+                                            options: {
+                                                account: {
+                                                    id: api.tools.A.info.user.info.id
+                                                }
+                                            }
+                                        });
+                                        api.tools.LM.load(false);
+                                    }
+                                }
+                            ],
+                            titleSettings: {
+                                title: "Facebook"
+                            }
+                        }
+                    },
+                    properties: {
+                        linked: {
+                            element: {
+                                element: "checkbox",
+                                settings: {
+                                    inputSettings: {
+                                        attributes: {
+                                            disabled: true,
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        name: {
+                            element: {
+                                element: "text-input",
+                                settings: {
+                                    containerSettings: {
+                                        classes: "form-floating w-100",
+                                    },
+                                    inputSettings: {
+                                        attributes: {
+                                            disabled: true,
+                                            readOnly: true
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        email: {
+                            element: {
+                                element: "email",
+                                settings: {
+                                    containerSettings: {
+                                        classes: "form-floating w-100",
+                                    },
+                                    inputSettings: {
+                                        attributes: {
+                                            disabled: true,
+                                            readOnly: true
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                google: {
+                    element: {
+                        element: "object",
+                        settings: {
+                            buttons: [
+                                {
+                                    type: "button",
+                                    HTML: "Link Google Account",
+                                    className: "btn-primary",
+                                    callback: async () => {
+                                        api.tools.LM.load(true);
+                                        let result = await api.graph.callObjectClientMethod(api.tools.A.info.app, api.tools.A.info.app.settings.clientMethods.loginWithThirdParty, {
+                                            org: 'google',
+                                            type: "create",
+                                            options: {
+                                                account: {
+                                                    id: api.tools.A.info.user.info.id
+                                                }
+                                            }
+                                        });
+                                        api.tools.LM.load(false);
+                                    }
+                                }
+                            ],
+                            titleSettings: {
+                                title: "Google"
+                            }
+                        }
+                    },
+                    properties: {
+                        linked: {
+                            element: {
+                                element: "checkbox",
+                                settings: {
+                                    inputSettings: {
+                                        attributes: {
+                                            disabled: true,
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        name: {
+                            element: {
+                                element: "text-input",
+                                settings: {
+                                    containerSettings: {
+                                        classes: "form-floating w-100",
+                                    },
+                                    inputSettings: {
+                                        attributes: {
+                                            disabled: true,
+                                            readOnly: true
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        email: {
+                            element: {
+                                element: "email",
+                                settings: {
+                                    containerSettings: {
+                                        classes: "form-floating w-100",
+                                    },
+                                    inputSettings: {
+                                        attributes: {
+                                            disabled: true,
+                                            readOnly: true
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    })
+
+    formContainer.appendChild(linkedAccountSettingsForm);
+</script>
