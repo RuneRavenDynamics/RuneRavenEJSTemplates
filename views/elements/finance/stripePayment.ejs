@@ -66,7 +66,7 @@
       billingPane.innerHTML = "";
 
       let checkoutOptions = {
-          id: `${options.id}.checkout`,
+          id: `payment-link.checkout`,
           content: {
               name,
               description,
@@ -74,7 +74,6 @@
               pricing
           },
           property: {
-              propertyParentPath: options.property.propertyPath,
               default: null,
               element: {
                   element: 'checkout',
@@ -104,7 +103,7 @@
                   }
               },
           },
-          inherited: options.inherited
+          inherited: {}
       }
       let checkoutElement = await self.runeraven.createElement(checkoutOptions);
       billingPane.appendChild(checkoutElement);
