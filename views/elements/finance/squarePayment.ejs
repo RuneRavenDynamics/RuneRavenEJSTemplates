@@ -20,37 +20,94 @@
       let paymentDataElement = document.querySelector('#payment-data-element');
       let data = JSON.parse(paymentDataElement.textContent);
 
-      let squareaccount
+      let squareaccount;
+      let business;
       
       if (data?.options?.provider?.id) {
         squareaccount = await api.graph.get(data.options.provider.id, "squareaccount");
+        business = await api.graph.getNode(squareaccount, "parents", { type: "business" });
       } else {
         squareaccount = await api.graph.getNode(api.tools.A.info.business, "children", { type: "squareaccount" });
+        business = api.tools.A.info.business;
       }
-      
+
       const customer = await api.graph.getNode(api.tools.A.info.user, "siblings", { type: "customer" }) || null;
 
-      if (!stripeaccount) {
+      if (!squareaccount) {
           console.log("No Square account found for business.");
           return;
       }
 
+      let name;
+      let description;
+      let title;
+      let pricing;
+      if (data?.options?.payment?.type === 'custom') {
+        name = data.options.payment?.name || null;
+        description = data.options.payment?.description || null;
+        title = data.options.payment?.title || null;
+        pricing = data.options.payment.pricing;
+      } else if (data?.options?.payment?.type === 'object') {
+        let object = await api.graph.get(data.options.payment.object.id, data.options.payment.object.type);
+        if (object && object?.info) {
+          name = object.info?.name || null;
+          description = object.info?.description || null;
+          title = object.info?.name || null;
+          pricingPath = `${object.info.type}_settings.pricing`;
+          pricing = api.graph.getByPath(object.info, pricingPath);
+        } else {
+          name = null;
+          description = null;
+          title = null;
+          pricing = {};
+        }
+      }
+
       billingPane.innerHTML = "";
 
-      await api.finance.element({
-          element: "payment",
-          provider: "square",
-          id: "business-payment-element",
-          parent: billingPane,
-          squareaccount,
-          customer,
-          payment_settings: {
-              amount: 100,
-              currency: "usd",
-              app_fee: 0,
-              description: null
+      let checkoutOptions = {
+          id: `${options.id}.checkout`,
+          content: {
+              name,
+              description,
+              title,
+              pricing
           },
-      });
+          property: {
+              propertyParentPath: options.property.propertyPath,
+              default: null,
+              element: {
+                  element: 'checkout',
+                  settings: {
+                      titleSettings: {
+                          show: false
+                      },
+                      contentSettings: {
+                          element: "div"
+                      },
+                      pricingSettings: {},
+                      financeSettings: {
+                          provider: "square",
+                          provideraccount: squareaccount,
+                          customer: (customer?.info) ? customer : null
+                      },
+                      checkoutSettings: {
+                          business,
+                          header: true,
+                          alert: false,
+                          custom_fields: null,
+                          customer: (customer?.info) ? false : true,
+                          paymentmethod: true,
+                          callback: null,
+                          data: {}
+                      }
+                  }
+              },
+          },
+          inherited: options.inherited
+      }
+      let checkoutElement = await self.runeraven.createElement(checkoutOptions);
+      billingPane.appendChild(checkoutElement);
     }
 
     await setupBilling();

@@ -20,12 +20,15 @@
       let paymentDataElement = document.querySelector('#payment-data-element');
       let data = JSON.parse(paymentDataElement.textContent);
 
-      let stripeaccount
+      let stripeaccount;
+      let business;
       
       if (data?.options?.provider?.id) {
         stripeaccount = await api.graph.get(data.options.provider.id, "stripeaccount");
+        business = await api.graph.getNode(stripeaccount, "parents", { type: "business" });
       } else {
         stripeaccount = await api.graph.getNode(api.tools.A.info.business, "children", { type: "stripeaccount" });
+        business = api.tools.A.info.business;
       }
 
       const customer = await api.graph.getNode(api.tools.A.info.user, "siblings", { type: "customer" }) || null;
@@ -35,22 +38,76 @@
           return;
       }
 
+      let name;
+      let description;
+      let title;
+      let pricing;
+      if (data?.options?.payment?.type === 'custom') {
+        name = data.options.payment?.name || null;
+        description = data.options.payment?.description || null;
+        title = data.options.payment?.title || null;
+        pricing = data.options.payment.pricing;
+      } else if (data?.options?.payment?.type === 'object') {
+        let object = await api.graph.get(data.options.payment.object.id, data.options.payment.object.type);
+        if (object && object?.info) {
+          name = object.info?.name || null;
+          description = object.info?.description || null;
+          title = object.info?.name || null;
+          pricingPath = `${object.info.type}_settings.pricing`;
+          pricing = api.graph.getByPath(object.info, pricingPath);
+        } else {
+          name = null;
+          description = null;
+          title = null;
+          pricing = {};
+        }
+      }
+
       billingPane.innerHTML = "";
 
-      await api.finance.element({
-          element: "payment",
-          provider: "stripe",
-          id: "business-payment-element",
-          parent: billingPane,
-          stripeaccount,
-          customer,
-          createIntentParams: {
-              amount: 100,
-              currency: 'USD',
-              application_fee_amount: 0,
-              description: null,
+      let checkoutOptions = {
+          id: `${options.id}.checkout`,
+          content: {
+              name,
+              description,
+              title,
+              pricing
           },
-      });
+          property: {
+              propertyParentPath: options.property.propertyPath,
+              default: null,
+              element: {
+                  element: 'checkout',
+                  settings: {
+                      titleSettings: {
+                          show: false
+                      },
+                      contentSettings: {
+                          element: "div"
+                      },
+                      pricingSettings: {},
+                      financeSettings: {
+                          provider: "stripe",
+                          provideraccount: stripeaccount,
+                          customer: (customer?.info) ? customer : null
+                      },
+                      checkoutSettings: {
+                          business,
+                          header: true,
+                          alert: false,
+                          custom_fields: null,
+                          customer: (customer?.info) ? false : true,
+                          paymentmethod: true,
+                          callback: null,
+                          data: {}
+                      }
+                  }
+              },
+          },
+          inherited: options.inherited
+      }
+      let checkoutElement = await self.runeraven.createElement(checkoutOptions);
+      billingPane.appendChild(checkoutElement);
     }
 
     await setupBilling();
