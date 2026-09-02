@@ -17,6 +17,8 @@
     async function setupBilling() {
       const billingPane = document.querySelector("#payment-checkout-element");
 
+      api.tools.LM.load(true, billingPane);
+
       let paymentDataElement = document.querySelector('#payment-data-element');
       let data = JSON.parse(paymentDataElement.textContent);
 
@@ -53,7 +55,7 @@
           name = object.info?.name || null;
           description = object.info?.description || null;
           title = object.info?.name || null;
-          pricingPath = `${object.info.type}_settings.pricing`;
+          let pricingPath = `${object.info.type}_settings.pricing`;
           pricing = api.graph.getByPath(object.info, pricingPath);
         } else {
           name = null;
@@ -107,6 +109,7 @@
       }
       let checkoutElement = await api.elements.runeraven.createElement(checkoutOptions);
       billingPane.appendChild(checkoutElement);
+      api.tools.LM.load(false, billingPane);
     }
 
     await setupBilling();
