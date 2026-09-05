@@ -21,7 +21,7 @@
 
         <%- include(`../../elements/content/object/element`, {elementId: content.elementId, element: content, elementData: page.data[content.elementId], scrollElement: true}) %>
 
-    <% } else if (content.type === 'objectList') { %>
+    <% } else if (content.type === 'objectForm') { %>
 
         <%- include(`../../elements/content/objectForm/element`, {elementId: content.elementId, element: content, elementData: page.data[content.elementId], scrollElement: true}) %>
 
