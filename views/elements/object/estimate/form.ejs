@@ -17,69 +17,64 @@
     console.log("On Estimate Page.");
 
     async function setupEstimate() {
-      const estimatePane = document.querySelector("#estimate-element");
+        const estimatePane = document.querySelector("#estimate-element");
 
-      api.tools.LM.load(true, estimatePane);
+        api.tools.LM.load(true, estimatePane);
 
-      let data = <%- JSON.stringify({ options: element }) %>;
+        let data = <%- JSON.stringify({ options: element }) %>;
 
-      let esimate = await api.graph.get(data.options.object.id, data.options.object.type);
+        let esimate = await api.graph.get(data.options.object.id, data.options.object.type);
 
-      estimatePane.innerHTML = "";
+        estimatePane.innerHTML = "";
 
-      let estimateOptions = {
-          id: `estimate-form-element`,
-          content: null,
-          property: {
-              default: null,
-              element: {
-                  element: 'estimate',
-                  settings: {
-                      titleSettings: {
-                          show: false
-                      },
-                      contentSettings: {
-                          element: "display"
-                      },
-                      objectSettings: {
-                        esimateSettings: {
-                            name: false,
-                            description: false,
-                            provider: false,
-                            pricing: true,
-                            email: false,
-                            customers: false,
-                            buttons: [
-                                {
-                                    id: "deny-esimate-button",
-                                    type: "button",
-                                    className: "btn-danger",
-                                    HTML: "Cancel Estimate",
-                                    callback: async () => {
-                                        api.tools.load(true);
-                                        await api.graph.callObjectMethod(esimate, "cancelEstimate", null, { refresh: false });
-                                        api.tools.load(false);
-                                        api.tools.FLM.success("Estimate has been cancelled, please contact us if you have any questions or concerns.", 5000);
-                                    }
-                                },
-                                {
-                                    id: "accept-esimate-button",
-                                    type: "button",
-                                    className: "btn-primary",
-                                    HTML: "Accept Estimate",
-                                    callback: async () => {
-                                        api.tools.load(true);
-                                        await api.graph.callObjectMethod(esimate, "acceptEstimate", null, { refresh: false });
-                                        api.tools.load(false);
-                                        api.tools.FLM.success("Estimate has been accepted! We will be in touch shortly.", 5000);
-                                    }
+        let estimateOptions = {
+            id: `estimate-form-element`,
+            content: null,
+            element: "estimate",
+            settings: {
+                titleSettings: {
+                    show: false
+                },
+                contentSettings: {
+                    element: "display"
+                },
+                objectSettings: {
+                    estimateSettings: {
+                        name: false,
+                        description: false,
+                        provider: false,
+                        pricing: true,
+                        email: false,
+                        customers: false,
+                        buttons: [
+                            {
+                                id: "deny-esimate-button",
+                                type: "button",
+                                className: "btn-danger",
+                                HTML: "Cancel Estimate",
+                                callback: async () => {
+                                    api.tools.load(true);
+                                    await api.graph.callObjectMethod(esimate, "cancelEstimate", null, { refresh: false });
+                                    api.tools.load(false);
+                                    api.tools.FLM.success("Estimate has been cancelled, please contact us if you have any questions or concerns.", 5000);
                                 }
-                            ]
-                        }
-                      }
-                  }
-              },
-          },
+                            },
+                            {
+                                id: "accept-esimate-button",
+                                type: "button",
+                                className: "btn-primary",
+                                HTML: "Accept Estimate",
+                                callback: async () => {
+                                    api.tools.load(true);
+                                    await api.graph.callObjectMethod(esimate, "acceptEstimate", null, { refresh: false });
+                                    api.tools.load(false);
+                                    api.tools.FLM.success("Estimate has been accepted! We will be in touch shortly.", 5000);
+                                }
+                            }
+                        ]
+                    }
+                }
+            },
           inherited: {
             object: esimate
           }
