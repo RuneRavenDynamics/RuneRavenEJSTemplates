@@ -1,0 +1,92 @@
+<div class="container my-3">
+  <div class="card shadow">
+    <div class="card-header text-white">
+      <h3 class="mb-0">Estimate</h3>
+    </div>
+    <div class="card-body" id="estimate-element">
+
+    </div>
+  </div>
+</div>
+
+<script type="module">
+    import { api } from "https://cdn.runeravendynamics.com/clientapi/latest/api.bundle.js";
+
+    await api.initialize();
+
+    async function setupEstimate() {
+      const estimatePane = document.querySelector("#estimate-element");
+
+      api.tools.LM.load(true, estimatePane);
+
+      let data = <%- JSON.stringify({ options: element }) %>;
+
+      let esimate = await api.graph.get(data.object.id, data.object.type);
+
+      estimatePane.innerHTML = "";
+
+      let estimateOptions = {
+          id: `estimate-form-element`,
+          content: null,
+          property: {
+              default: null,
+              element: {
+                  element: 'estimate',
+                  settings: {
+                      titleSettings: {
+                          show: false
+                      },
+                      contentSettings: {
+                          element: "display"
+                      },
+                      objectSettings: {
+                        esimateSettings: {
+                            name: true,
+                            description: true,
+                            provider: false,
+                            pricing: true,
+                            email: false,
+                            customers: false,
+                            buttons: [
+                                {
+                                    id: "deny-esimate-button",
+                                    type: "button",
+                                    className: "btn-danger",
+                                    HTML: "Cancel Estimate",
+                                    callback: async () => {
+                                        api.tools.load(true);
+                                        await api.graph.callObjectMethod(esimate, "cancelEstimate", null, { refresh: false });
+                                        api.tools.load(false);
+                                        api.tools.FLM.success("Estimate has been cancelled, please contact us if you have any questions or concerns.", 5000);
+                                    }
+                                },
+                                {
+                                    id: "accept-esimate-button",
+                                    type: "button",
+                                    className: "btn-primary",
+                                    HTML: "Accept Estimate",
+                                    callback: async () => {
+                                        api.tools.load(true);
+                                        await api.graph.callObjectMethod(esimate, "acceptEstimate", null, { refresh: false });
+                                        api.tools.load(false);
+                                        api.tools.FLM.success("Estimate has been accepted! We will be in touch shortly.", 5000);
+                                    }
+                                }
+                            ]
+                        }
+                      }
+                  }
+              },
+          },
+          inherited: {
+            object: esimate
+          }
+      }
+      let estimateElement = await api.elements.runeraven.createElement(estimateOptions);
+      estimatePane.appendChild(estimateElement);
+
+      api.tools.LM.load(false, estimatePane);
+    }
+
+    await setupEstimate();
+</script>

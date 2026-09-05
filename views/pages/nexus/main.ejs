@@ -23,6 +23,10 @@
 
     <% } else if (content.type === 'objectList') { %>
 
+        <%- include(`../../elements/content/objectForm/element`, {elementId: content.elementId, element: content, elementData: page.data[content.elementId], scrollElement: true}) %>
+
+    <% } else if (content.type === 'objectList') { %>
+
         <%- include(`../../elements/content/objectList/element`, {elementId: content.elementId, element: content, elementData: page.data[content.elementId], scrollElement: true}) %>
 
     <% } else if (content.type === 'template') { %>

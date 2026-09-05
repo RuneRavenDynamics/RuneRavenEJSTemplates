@@ -19,8 +19,7 @@
 
       api.tools.LM.load(true, billingPane);
 
-      let paymentDataElement = document.querySelector('#payment-data-element');
-      let data = JSON.parse(paymentDataElement.textContent);
+      let data = <%- JSON.stringify({ options: element.template.options }) %>;
 
       let squareaccount;
       let business;

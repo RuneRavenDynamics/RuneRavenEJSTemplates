@@ -8,9 +8,6 @@
 
 
 <section class="vw-100 mb-2" id="<%= elementId %>" style="<%= formatElementStyles(element.styles || []) %>" <%= typeof scrollElement !== 'undefined' && scrollElement ? 'data-scroll-section' : '' %>>
-    <script type="application/json" id="payment-data-element">
-        <%- JSON.stringify({ options: element.template.options }) %>
-    </script>
 
     <% if (element.template.options?.provider?.type === 'stripeaccount') { %> 
         <%- include('../../finance/stripePayment') %>
