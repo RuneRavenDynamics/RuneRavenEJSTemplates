@@ -23,7 +23,7 @@
 
       let data = <%- JSON.stringify({ options: element }) %>;
 
-      let esimate = await api.graph.get(data.object.id, data.object.type);
+      let esimate = await api.graph.get(data.options.object.id, data.options.object.type);
 
       estimatePane.innerHTML = "";
 
