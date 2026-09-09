@@ -73,14 +73,14 @@
     <div class="tab-content p-3 dashboard-tab-content" id="myTabContent" data-scroll data-scroll-sticky data-scroll-target=".dashboard">
 
         <div class="h-100 tab-pane fade show active" id="home-tab-pane" role="tabpanel" aria-labelledby="home-tab" tabindex="0">
-            <%- include("./sections/notification"); %>
+            <%- include("../../elements/account/notification"); %>
         </div>
 
         <% if (page?.info?.page_settings?.content?.adminDashboard?.sections) { %>
             <% Object.entries(page.info.page_settings.content.adminDashboard.sections).forEach(([id, section]) => { %>
                 <div class="h-100 tab-pane fade" id="<%= id %>-tab-pane" role="tabpanel" aria-labelledby="<%= id %>-tab" tabindex="0">
                     <% if (section.template) { %>
-                        <%- include(`./sections/${section.template}`); %>
+                        <%- include(`../../elements/account/${section.template}`); %>
                     <% } %>
                 </div>
             <% }) %>
