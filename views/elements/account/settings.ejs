@@ -27,6 +27,41 @@
 
     formContainer.innerHTML = ``;
 
+    let basicSettingsForm = await api.elements.element({
+        api: "runeraven",
+        element: "object",
+        id: "basic_account_settings",
+        content: {
+            notifications: api.app?.serviceworker?.pushSubscription ? true : false
+        },
+        property: {
+            properties: {
+                notifications: {
+                    element: {
+                        element: "checkbox",
+                        settings: {
+                            inputSettings: {
+                                events: {
+                                    change: async (params) => {
+                                        if (params?.element?.checked) {
+                                            await api.app.serviceworker.subscribeToPush()
+                                            api.tools.FLM.success("You will now recieve notificaitons", 5000);
+                                        } else {
+                                            await api.app.serviceworker.unsubscribeFromPush()
+                                            api.tools.FLM.success("Notifications have been disabled.", 5000);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    })
+
+    formContainer.appendChild(basicSettingsForm);
+    
     let settingsContent = {
         facebook: {},
         google: {},
