@@ -61,16 +61,21 @@
                     element: {
                         element: "select",
                         settings: {
+                            containerSettings: {
+                                classes: "form-floating w-100"
+                            },
                             inputSettings: {
-                                options: [
-                                    { label: "Light", value: "light" },
-                                    { label: "Dark", value: "dark" }
-                                ],
                                 events: {
                                     change: async (params) => {
                                         document.documentElement.setAttribute('data-bs-theme', params.element.value);
                                     }
                                 }
+                            },
+                            selectSettings: {
+                                options: [
+                                    { label: "Light", value: "light" },
+                                    { label: "Dark", value: "dark" }
+                                ],
                             }
                         }
                     }
