@@ -32,7 +32,8 @@
         element: "object",
         id: "basic_account_settings",
         content: {
-            notifications: api.app?.serviceworker?.pushSubscription ? true : false
+            notifications: api.app?.serviceworker?.pushSubscription ? true : false,
+            theme: document.documentElement.getAttribute('data-bs-theme') || 'light'
         },
         property: {
             properties: {
@@ -55,13 +56,31 @@
                             }
                         }
                     }
+                },
+                theme: {
+                    element: {
+                        element: "select",
+                        settings: {
+                            inputSettings: {
+                                options: [
+                                    { label: "Light", value: "light" },
+                                    { label: "Dark", value: "dark" }
+                                ],
+                                events: {
+                                    change: async (params) => {
+                                        document.documentElement.setAttribute('data-bs-theme', params.element.value);
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
     })
 
     formContainer.appendChild(basicSettingsForm);
-    
+
     let settingsContent = {
         facebook: {},
         google: {},
@@ -150,7 +169,7 @@
                         },
                         email: {
                             element: {
-                                element: "email",
+                                element: "email-input",
                                 settings: {
                                     containerSettings: {
                                         classes: "form-floating w-100",
@@ -226,7 +245,7 @@
                         },
                         email: {
                             element: {
-                                element: "email",
+                                element: "email-input",
                                 settings: {
                                     containerSettings: {
                                         classes: "form-floating w-100",
