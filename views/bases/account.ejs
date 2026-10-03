@@ -13,10 +13,10 @@
     </script>
     <%- include('../heads/main.ejs') %>
 </head>
-<body id="<%= page.module.info.name ?? "default" %>-page" data-scroll-container>
+<body id="<%= page.module.info.name ?? "default" %>-page">
 
     <div id="scroll-container" data-scroll-container>
-        
+
         <!-- Flash Messages -->
             <div class="container flash-messages">
                 <% if (messages) { %>
