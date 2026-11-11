@@ -10,7 +10,12 @@
 <section class="vw-100 vh-50 mb-2">
     <!-- Carousel Hero -->
     <div class="container-fluid mh-100 h-100 overflow-hidden">
-        <%- include('../../media/carousel.ejs', {slideshow: {id: `category-hero-${object.info.uoid}`, title: `${object.info.name}`, description: object.info.description, slides: object.media}}) %>
+        <%- include('../../media/carousel.ejs', {
+            slideshow: {id: `category-hero-${object.info.uoid}`,
+            title: `${object.info.name}`,
+            description: object.info.description,
+            slides: object.media.files
+        }}) %>
     </div>
 </section>
 
