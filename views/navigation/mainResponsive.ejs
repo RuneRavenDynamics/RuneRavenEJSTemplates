@@ -41,10 +41,42 @@
       <%- include('./accounts.ejs') %>
     <% } %>
 
+    <% if (Array.isArray(navigation?.buttons)) { %>
+      <% navigation.buttons.forEach(button => { %>
+        <% if (!button?.type || !button?.text) return; %>
+
+        <li class="nav-item ms-lg-2">
+          <% if (button.type === "phone" && button.content) { %>
+            <a
+              href="tel:<%= String(button.content).replace(/[^\d+]/g, '') %>"
+              class="btn btn-outline-primary d-inline-flex align-items-center justify-content-center"
+            >
+              <i class="fa fa-phone me-2"></i>
+              <%= button.text %>
+            </a>
+
+          <% } else if (button.type === "link" && button.url) { %>
+            <a
+              href="<%= button.url %>"
+              class="btn btn-outline-primary d-inline-flex align-items-center justify-content-center"
+            >
+              <%= button.text %>
+            </a>
+          <% } %>
+        </li>
+      <% }) %>
+    <% } %>
+
     <% if (app.info.application_options?.versions?.pwa?.enabled || page.info.page_options.webapp) { %>
-      <button id="downloadAppBtn" class="btn btn-primary ms-2 d-inline-flex m-auto pwa-download-button">
-        <i class="fa fa-download me-1"></i> Download app
-      </button>
+      <li class="nav-item ms-lg-2">
+        <button
+          id="downloadAppBtn"
+          class="btn btn-primary d-inline-flex align-items-center justify-content-center pwa-download-button"
+        >
+          <i class="fa fa-download me-2"></i>
+          Download app
+        </button>
+      </li>
     <% } %>
 
     <!-- Include the theme toggler -->
