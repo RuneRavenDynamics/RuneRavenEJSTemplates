@@ -1,0 +1,20 @@
+
+
+
+
+
+
+
+
+
+<div class="card shadow-sm h-auto p-3">
+    <img src="<%= object?.thumbnail?.url || Object.values(object.media.files)[0].url %>" class="card-img-top" alt="<%= object.thumbnail.alt %>">
+    <div class="card-body text-center">
+        <h5 class="card-title text-primary"><%= object.info.name %></h5>
+        <% if (object?.elementId) { %>
+            <a href="#<%= object.elementId %>" class="btn btn-primary scroll-link">View</a>
+        <% } else if (object?.url || object?.info?.url) { %>
+            <a href="<%= object?.url || object?.info?.url %>" class="btn btn-primary">View</a>
+        <% } %>
+    </div>
+</div>

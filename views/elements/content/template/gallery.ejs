@@ -32,16 +32,16 @@
 
 </style>
 
-<% for (let container of elementData.objects) { 
-    container.elementId = crypto.randomUUID();
-    container.template = "slideshow";
-    if (container && container.info && container.info.data && container.info.data.thumbnail) {
-        container.thumbnail = container.info.data.thumbnail;
+<% for (let collection of elementData.objects) { 
+    collection.elementId = crypto.randomUUID();
+    collection.template = "slideshow";
+    if (collection?.info?.data?.thumbnail) {
+        collection.thumbnail = collection.info.data.thumbnail;
     } else {
-        let media = Object.values(container.media.files)[0];
-        container.thumbnail = {
+        let media = Object.values(collection.media.files)[0];
+        collection.thumbnail = {
             url: media.url,
-            alt: container.info.description
+            alt: collection.info.description
         }
     }
 } %>
@@ -49,13 +49,13 @@
 <section class="vw-100 vh-50" <%= typeof scrollElement !== 'undefined' && scrollElement ? 'data-scroll-section' : '' %>>
 
     <!-- Galleries Previews -->
-    <div class="container-fluid h-auto">
+    <div class="collection-fluid h-auto">
         <div class="row">
             <div class="swiper swiper-preview w-100 p-5">
                 <div class="swiper-wrapper">
-                    <% for (const container of elementData.objects) { %>
+                    <% for (const collection of elementData.objects) { %>
                         <div class="swiper-slide">
-                            <%- include('../../object/container/preview', { object: container }) %>
+                            <%- include('../../object/collection/preview', { object: collection }) %>
                         </div>
                     <% } %>
                 </div>
