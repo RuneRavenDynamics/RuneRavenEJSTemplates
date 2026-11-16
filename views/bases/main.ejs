@@ -38,7 +38,7 @@
             <%- JSON.stringify({ app, business, brand, page, data, user: session.user }) %>
         </script>
 
-        <% if (page.info.page_settings?.content?.header?.view) { %>
+        <% if (page.info.page_settings?.content?.header?.view && page.info.page_settings?.content?.header?.view !== 'none') { %>
             <% if (page.info.page_settings.content.header.view === 'default') { %>
                 <%- include('../headers/mainResponsive') %>
             <% } else { %>
@@ -48,7 +48,7 @@
 
         <main class="pageContent h-auto" id="pageContent">
             <div class="pageContent-content w-100 h-auto" id="pageContent-content">
-                <% if (page.info.page_settings?.content?.background?.view) { %>
+                <% if (page.info.page_settings?.content?.background?.view && page.info.page_settings?.content?.background?.view !== 'none') { %>
                     <% if (page.info.page_settings.content.background.view === 'default') { %> 
                     
                     <% } else { %>
@@ -61,7 +61,7 @@
         
         <%- include('../elements/utility/loadElements.ejs') %>
 
-        <% if (page.info.page_settings?.content?.footer?.view) { %>
+        <% if (page.info.page_settings?.content?.footer?.view && page.info.page_settings?.content?.footer?.view !== 'none') { %>
             <% if (page.info.page_settings.content.footer.view === 'default') { %>
                 <%- include(`../footers/main`); %>
             <% } else { %>
