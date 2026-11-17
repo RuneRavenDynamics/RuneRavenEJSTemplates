@@ -26,14 +26,14 @@
                 }
             }) %>
         </div>
-    <% } else if (element.template.options.type === 'container') { %>
+    <% } else if (element.template.options.type === 'collection') { %>
         <% 
             elementData.object.title = business.info.name;
             elementData.object.description = business.info.description;
         %>
         <!-- Carousel Hero -->
         <div class="container-fluid mh-100 h-100 overflow-hidden">
-            <%- include('../../object/container/display', { object: elementData.object }) %>
+            <%- include('../../object/collection/display', { object: elementData.object }) %>
         </div>
     <% } %>
 
