@@ -67,6 +67,7 @@
         
         let eventElement = await api.elements.runeraven.createElement(eventOptions);
         eventPane.appendChild(eventElement);
+        await api.graph.elements.callDisplayCallbacksWhenConnected(eventElement);
 
         api.tools.LM.load(false, eventPane);
     }
