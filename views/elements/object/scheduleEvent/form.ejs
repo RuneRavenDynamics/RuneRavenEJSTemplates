@@ -20,65 +20,56 @@
 
         api.tools.LM.load(true, eventPane);
 
+        let data = <%- JSON.stringify({ options: element }) %>;
+        let eventSettings = data.options.object.options;
+
+        let event;
+        if (data.options.object?.type && data.options.object?.id) {
+            event = await api.graph.get(data.options.object.id, data.options.object.type);
+        }
+        let schedule = await api.graph.get(eventSettings.schedule.id, eventSettings.schedule.type);
+
         eventPane.innerHTML = "";
 
         let eventOptions = {
-            id: `event -form-element`,
+            id: `event-form-element`,
             content: null,
-            element: "estimate",
+            element: "event",
             settings: {
                 titleSettings: {
                     show: false
                 },
                 contentSettings: {
-                    element: "display"
+                    element: "form"
                 },
                 objectSettings: {
-                    estimateSettings: {
-                        name: false,
-                        description: false,
-                        provider: false,
-                        pricing: true,
-                        email: false,
-                        customers: false,
-                        buttons: [
-                            {
-                                id: "deny-esimate-button",
-                                type: "button",
-                                className: "btn-danger",
-                                HTML: "Cancel Estimate",
-                                callback: async () => {
-                                    api.tools.LM.load(true);
-                                    await api.graph.callObjectMethod(esimate, "cancelEstimate", null, { refresh: false });
-                                    api.tools.LM.load(false);
-                                    api.tools.FLM.success("Estimate has been cancelled, please contact us if you have any questions or concerns.", 5000);
-                                }
-                            },
-                            {
-                                id: "accept-esimate-button",
-                                type: "button",
-                                className: "btn-primary",
-                                HTML: "Accept Estimate",
-                                callback: async () => {
-                                    api.tools.LM.load(true);
-                                    await api.graph.callObjectMethod(esimate, "acceptEstimate", null, { refresh: false });
-                                    api.tools.LM.load(false);
-                                    api.tools.FLM.success("Estimate has been accepted! We will be in touch shortly.", 5000);
-                                }
-                            }
-                        ]
+                    schedule,
+                    eventSettings: {
+                        name: {
+                            content: eventSettings.name
+                        },
+                        description: {
+                            content: eventSettings.description
+                        },
+                        type: {
+                            content: eventSettings.type
+                        },
+                        duration: eventSettings?.duration || 60,
+                        start: eventSettings?.period?.start || null,
+                        end: eventSettings?.period?.end || null
                     }
                 }
             },
-          inherited: {
-            object: esimate
-          }
-      }
+            inherited: {
+                object: event
+            }
+        }
+        
         let eventElement = await api.elements.runeraven.createElement(eventOptions);
         eventPane.appendChild(eventElement);
 
         api.tools.LM.load(false, eventPane);
     }
 
-    await setupEstimate();
+    await setupEvent();
 </script>
