@@ -1,7 +1,7 @@
 <div class="container my-3">
   <div class="card shadow">
     <div class="card-header text-white">
-      <h3 class="mb-0" id="event-form-title"></h3>
+      <h3 class="mb-0 card-title" id="event-form-title"></h3>
     </div>
     <div class="card-body" id="event-element">
 
@@ -22,6 +22,7 @@
 
         let data = <%- JSON.stringify({ options: element }) %>;
         let eventSettings = data.options.object.options;
+        eventPaneTitle.textContent = eventSettings.name;
 
         let event;
         if (data.options.object?.type && data.options.object?.id) {
@@ -34,7 +35,7 @@
         let eventOptions = {
             id: `event-form-element`,
             content: null,
-            element: "event",
+            element: "booking",
             settings: {
                 titleSettings: {
                     show: false
@@ -44,19 +45,19 @@
                 },
                 objectSettings: {
                     schedule,
-                    eventSettings: {
-                        name: {
-                            content: eventSettings.name
-                        },
-                        description: {
-                            content: eventSettings.description
-                        },
-                        type: {
-                            content: eventSettings.type
-                        },
-                        duration: eventSettings?.duration || 60,
-                        start: eventSettings?.period?.start || null,
-                        end: eventSettings?.period?.end || null
+                    bookingSettings: {
+                        eventSettings: {
+                            name: false,
+                            description: {
+                                content: eventSettings.description
+                            },
+                            type: {
+                                content: eventSettings.type
+                            },
+                            duration: eventSettings?.duration || 60,
+                            start: eventSettings?.period?.start || null,
+                            end: eventSettings?.period?.end || null
+                        }
                     }
                 }
             },
