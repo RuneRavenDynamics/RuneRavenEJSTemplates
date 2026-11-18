@@ -46,11 +46,16 @@
                 objectSettings: {
                     schedule,
                     bookingSettings: {
+                        steps: [
+                            'event'
+                        ],
                         eventSettings: {
+                            flow: "steps",
                             name: false,
                             description: {
                                 content: eventSettings.description
                             },
+                            customer: true,
                             duration: eventSettings?.duration || 60,
                             start: eventSettings?.period?.start || null,
                             end: eventSettings?.period?.end || null
