@@ -50,138 +50,134 @@
 
 <% if (object && object.info) { %>
 
-    <%
-    function buildElement(c) {
-    %>
-      <% if (c?.type === 'description') { %> 
-          <div style="<%= formatElementStyles(c?.styles || []) %>">
-            <p><%= object.info.description %></p>
-          </div>
-      <% } else if (c?.type === 'long_description') { %> 
-          <div style="<%= formatElementStyles(c?.styles || []) %>">
-            <p><%= object.info.long_description %></p>
-          </div>
-      <% } else if (c?.type === 'quick_facts') { %> 
-          <div style="<%= formatElementStyles(c?.styles || []) %>">
-              <% const quickFacts = [
-                  { icon: 'fa-solid fa-layer-group', label: 'Type',     value: object.info.service_settings?.type ? formatHeading(object.info.service_settings.type) : null },
-                  { icon: 'fa-solid fa-tag',      label: 'Base price',  value: formatMoney(object.info.service_settings.pricing.amount, object.info.service_settings.pricing.currency) },
-                  { icon: 'fa-regular fa-clock',  label: 'Duration',    value: formatDuration(object.info.service_settings.schedule.duration.period, object.info.service_settings.schedule.duration.period_type) },
-                  { icon: 'fa-solid fa-rotate',   label: 'Frequency',     value: formatCadence(object.info.service_settings.schedule.recurrence) }
-                ].filter(x => x.value); %>
+  <%
+  function buildElement(c) {
+  %>
+    <% if (c?.type === 'description') { %> 
+        <div style="<%= formatElementStyles(c?.styles || []) %>">
+          <p><%= object.info.description %></p>
+        </div>
+    <% } else if (c?.type === 'long_description') { %> 
+        <div style="<%= formatElementStyles(c?.styles || []) %>">
+          <p><%= object.info.long_description %></p>
+        </div>
+    <% } else if (c?.type === 'quick_facts') { %> 
+        <div style="<%= formatElementStyles(c?.styles || []) %>">
+            <% const quickFacts = [
+                { icon: 'fa-solid fa-layer-group', label: 'Type',     value: object.info.service_settings?.type ? formatHeading(object.info.service_settings.type) : null },
+                { icon: 'fa-solid fa-tag',      label: 'Base price',  value: formatMoney(object.info.service_settings.pricing.amount, object.info.service_settings.pricing.currency) },
+                { icon: 'fa-regular fa-clock',  label: 'Duration',    value: formatDuration(object.info.service_settings.schedule.duration.period, object.info.service_settings.schedule.duration.period_type) },
+                { icon: 'fa-solid fa-rotate',   label: 'Frequency',     value: formatCadence(object.info.service_settings.schedule.recurrence) }
+              ].filter(x => x.value); %>
 
-                <% if (c?.enabled && quickFacts.length) { %>
-                  <div class="card shadow-sm border-0 mt-3" aria-label="Service quick facts">
-                    <div class="card-body py-3">
-                      <div class="d-flex flex-wrap justify-content-start gap-2">
-                        <% quickFacts.forEach(f => { %>
-                          <div class="fact-chip d-inline-flex align-items-center gap-2 px-3 py-2 rounded">
-                            <i class="<%= f.icon %>"></i>
-                            <div class="d-flex flex-column gap-2 lh-1">
-                              <small class="text-muted"><%= f.label %></small>
-                              <strong><%= f.value %></strong>
-                            </div>
+              <% if (c?.enabled && quickFacts.length) { %>
+                <div class="card shadow-sm border-0 mt-3" aria-label="Service quick facts">
+                  <div class="card-body py-3">
+                    <div class="d-flex flex-wrap justify-content-start gap-2">
+                      <% quickFacts.forEach(f => { %>
+                        <div class="fact-chip d-inline-flex align-items-center gap-2 px-3 py-2 rounded">
+                          <i class="<%= f.icon %>"></i>
+                          <div class="d-flex flex-column gap-2 lh-1">
+                            <small class="text-muted"><%= f.label %></small>
+                            <strong><%= f.value %></strong>
                           </div>
-                        <% }) %>
-                      </div>
+                        </div>
+                      <% }) %>
                     </div>
                   </div>
-                <% } %>
-          </div>
-      <% } else if (c?.type === 'call_to_action') { %> 
-          <div style="<%= formatElementStyles(c?.styles || []) %>">
-            <% if (c?.enabled) { %>
-              <!-- === CTA (under quick facts, before media) === -->
-              <%
-                const cta = c;
-                cta.text = cta?.text || object?.info?.data?.cta?.text || null;
-                cta.url = cta?.url || object?.info?.data?.cta?.url || null;
-                const ctaText = (cta && typeof cta.text === 'string' && cta.text.trim()) ? cta.text.trim() : 'Contact Us';
-                const ctaUrl  = (cta && typeof cta.url  === 'string' && cta.url.trim())  ? cta.url.trim()  : '/contact';
-                const isExternal = /^https?:\/\//i.test(ctaUrl);
-              %>
-              <div class="mt-3 d-flex align-items-center justify-content-center">
-                <a
-                  href="<%= ctaUrl %>"
-                  class="btn btn-primary btn-lg"
-                  <% if (isExternal) { %> target="_blank" rel="noopener noreferrer" <% } %>>
-                  <i class="fa-solid fa-paper-plane me-2"></i><%= ctaText %>
-                </a>
-              </div>
-              <!-- === /CTA === -->
-            <% } %>
-          </div>
-      <% } else if (c?.type === 'media') { %>
-
-            <div class="mb-4 vh-50" style="<%= formatElementStyles(c?.styles || []) %>">
-              <!-- Media / Slider -->
-              <div class="rounded shadow w-100 h-100">
-                <% 
-                    let slideshowOptions = {
-                        id: `${object.info.uoid}-slideshow`,
-                        type: "swiper-media-cube",
-                        slides: object.media.files,
-                        options: {
-                            navigation: true,
-                            pagination: true
-                        }
-                    };
-                %>
-                <%- include('../../media/slideshow', { slideshow: slideshowOptions }) %>
-              </div>
-            </div>
-
-        <% } else if (c?.type === 'subscription_plans') { %>
-
-            <% if (Object.keys(object?.objects?.subscriptionPlan || {}).length) { 
-              let plans = Object.values(object.objects.subscriptionPlan);
-              %>
-              <%- include('../subscriptionplan/list', { 
-                objects: {
-                  title: "Subscription Plans",
-                  objects: plans,
-                }
-              }) %>
-              
-            <% } %>
-
-        <% } else if (c?.type === 'schedule') { %>
-
-            <% if (object.info.service_settings.schedule.recurrence.recurring && object.info.service_settings.schedule.recurrence.options) { %>
-              <%- include('../../property/schedule', { 
-                content: {
-                  schedule: object.info.service_settings.schedule,
-                  title: `Schedules`
-                }
-              }) %>
-            <% } %>
-        
-        <% } else if (c?.type === 'details') { %>
-      
-            <% if (object.info.details) { %>
-              <%- include('../../property/features', { 
-                content: {
-                  id: `${object.info.uoid}-features`,
-                  type: c?.options?.type || "accordion",
-                  title: c?.options?.title || "Details",
-                  items: Object.values(object.info?.details || {})
-                }
-              }) %>
-            <% } %>
-
-        <% } else if (c?.type === 'container') { %>
-              <div style="<%= formatElementStyles(c?.styles || {}) %>">
-                    <% for (const sc of c?.options?.content || []) { %>
-                          <% buildElement(sc); %>
-                    <% } %>
                 </div>
+              <% } %>
+        </div>
+    <% } else if (c?.type === 'call_to_action') { %> 
+        <div style="<%= formatElementStyles(c?.styles || []) %>">
+          <% if (c?.enabled) { %>
+            <!-- === CTA (under quick facts, before media) === -->
+            <%
+              const cta = c;
+              cta.text = cta?.text || object?.info?.data?.cta?.text || null;
+              cta.url = cta?.url || object?.info?.data?.cta?.url || null;
+              const ctaText = (cta && typeof cta.text === 'string' && cta.text.trim()) ? cta.text.trim() : 'Contact Us';
+              const ctaUrl  = (cta && typeof cta.url  === 'string' && cta.url.trim())  ? cta.url.trim()  : '/contact';
+              const isExternal = /^https?:\/\//i.test(ctaUrl);
+            %>
+            <div class="mt-3 d-flex align-items-center justify-content-center">
+              <a
+                href="<%= ctaUrl %>"
+                class="btn btn-primary btn-lg"
+                <% if (isExternal) { %> target="_blank" rel="noopener noreferrer" <% } %>>
+                <i class="fa-solid fa-paper-plane me-2"></i><%= ctaText %>
+              </a>
+            </div>
+            <!-- === /CTA === -->
+          <% } %>
+        </div>
+    <% } else if (c?.type === 'media') { %>
+
+          <div class="mb-4 vh-50" style="<%= formatElementStyles(c?.styles || []) %>">
+            <!-- Media / Slider -->
+            <div class="rounded shadow w-100 h-100">
+              <% 
+                  let slideshowOptions = {
+                      id: `${object.info.uoid}-slideshow`,
+                      type: "swiper-media-cube",
+                      slides: object.media.files,
+                      options: {
+                          navigation: true,
+                          pagination: true
+                      }
+                  };
+              %>
+              <%- include('../../media/slideshow', { slideshow: slideshowOptions }) %>
+            </div>
+          </div>
+
+    <% } else if (c?.type === 'subscription_plans') { %>
+
+        <% if (Object.keys(object?.objects?.subscriptionPlan || {}).length) { 
+          let plans = Object.values(object.objects.subscriptionPlan);
+          %>
+          <%- include('../subscriptionplan/list', { 
+            objects: {
+              title: "Subscription Plans",
+              objects: plans,
+            }
+          }) %>
+          
         <% } %>
 
-      <% } %>
-      
-    <%
-    }
-    %>
+    <% } else if (c?.type === 'schedule') { %>
+
+        <% if (object.info.service_settings.schedule.recurrence.recurring && object.info.service_settings.schedule.recurrence.options) { %>
+          <%- include('../../property/schedule', { 
+            content: {
+              schedule: object.info.service_settings.schedule,
+              title: `Schedules`
+            }
+          }) %>
+        <% } %>
+    
+    <% } else if (c?.type === 'details') { %>
+  
+        <% if (object.info.details) { %>
+          <%- include('../../property/features', { 
+            content: {
+              id: `${object.info.uoid}-features`,
+              type: c?.options?.type || "accordion",
+              title: c?.options?.title || "Details",
+              items: Object.values(object.info?.details || {})
+            }
+          }) %>
+        <% } %>
+
+    <% } else if (c?.type === 'container') { %>
+          <div style="<%= formatElementStyles(c?.styles || {}) %>">
+                <% for (const sc of c?.options?.content || []) { %>
+                      <% buildElement(sc); %>
+                <% } %>
+            </div>
+    <% } %>
+
+  <% } %>
 
     <section class="container mb-5">
         <div class="row gy-5 my-5">
