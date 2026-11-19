@@ -27,6 +27,13 @@
         let event;
         if (data.options.object?.type && data.options.object?.id) {
             event = await api.graph.get(data.options.object.id, data.options.object.type);
+        } else {
+            event = {
+                info: {
+                    name: eventSettings.name,
+                    description: eventSettings.description,
+                }
+            }
         }
         let schedule = await api.graph.get(eventSettings.schedule.id, eventSettings.schedule.type);
 
@@ -44,6 +51,7 @@
                     element: "form"
                 },
                 objectSettings: {
+                    business: api.app.data.business,
                     schedule,
                     bookingSettings: {
                         steps: [
