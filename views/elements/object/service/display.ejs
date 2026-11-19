@@ -58,13 +58,17 @@
         <div class="row gy-4 mb-5 justify-content-center">
 
             <% for (let c of element?.object?.options?.content || []) { %>
-                <% if (c?.type === 'base') { %> 
-                  <div class="col-lg-8">
-                      <!-- Text content -->
-                      <p><%= object.info.description %></p>
-                      <p><%= object.info.long_description %></p>
-
-                        <% const quickFacts = [
+              <% if (c?.type === 'description') { %> 
+                  <div style="<%= formatElementStyles(c?.styles || []) %>">
+                    <p><%= object.info.description %></p>
+                  </div>
+              <% } else if (c?.type === 'long_description') { %> 
+                  <div style="<%= formatElementStyles(c?.styles || []) %>">
+                    <p><%= object.info.long_description %></p>
+                  </div>
+              <% } else if (c?.type === 'quick_facts') { %> 
+                  <div style="<%= formatElementStyles(c?.styles || []) %>">
+                      <% const quickFacts = [
                           { icon: 'fa-solid fa-layer-group', label: 'Type',     value: object.info.service_settings?.type ? formatHeading(object.info.service_settings.type) : null },
                           { icon: 'fa-solid fa-tag',      label: 'Base price',  value: formatMoney(object.info.service_settings.pricing.amount, object.info.service_settings.pricing.currency) },
                           { icon: 'fa-regular fa-clock',  label: 'Duration',    value: formatDuration(object.info.service_settings.schedule.duration.period, object.info.service_settings.schedule.duration.period_type) },
@@ -88,30 +92,33 @@
                             </div>
                           </div>
                         <% } %>
+                  </div>
+              <% } else if (c?.type === 'call_to_action') { %> 
+                  <div style="<%= formatElementStyles(c?.styles || []) %>">
+                    <% if (c?.enabled) { %>
+                      <!-- === CTA (under quick facts, before media) === -->
+                      <%
+                        const cta = c;
+                        cta.text = cta?.text || object?.info?.data?.cta?.text || null;
+                        cta.url = cta?.url || object?.info?.data?.cta?.url || null;
+                        const ctaText = (cta && typeof cta.text === 'string' && cta.text.trim()) ? cta.text.trim() : 'Contact Us';
+                        const ctaUrl  = (cta && typeof cta.url  === 'string' && cta.url.trim())  ? cta.url.trim()  : '/contact';
+                        const isExternal = /^https?:\/\//i.test(ctaUrl);
+                      %>
+                      <div class="mt-3 d-flex align-items-center justify-content-center">
+                        <a
+                          href="<%= ctaUrl %>"
+                          class="btn btn-primary btn-lg"
+                          <% if (isExternal) { %> target="_blank" rel="noopener noreferrer" <% } %>>
+                          <i class="fa-solid fa-paper-plane me-2"></i><%= ctaText %>
+                        </a>
+                      </div>
+                      <!-- === /CTA === -->
+                    <% } %>
+                  </div>
+              <% } else if (c?.type === 'media') { %>
 
-                        <% if (c?.options?.cta?.enabled) { %>
-                          <!-- === CTA (under quick facts, before media) === -->
-                          <%
-                            const cta = c?.options?.cta || object?.info?.data?.cta;
-                            const ctaText = (cta && typeof cta.text === 'string' && cta.text.trim()) ? cta.text.trim() : 'Contact Us';
-                            const ctaUrl  = (cta && typeof cta.url  === 'string' && cta.url.trim())  ? cta.url.trim()  : '/contact';
-                            const isExternal = /^https?:\/\//i.test(ctaUrl);
-                          %>
-                          <div class="mt-3 d-flex align-items-center justify-content-center">
-                            <a
-                              href="<%= ctaUrl %>"
-                              class="btn btn-primary btn-lg"
-                              <% if (isExternal) { %> target="_blank" rel="noopener noreferrer" <% } %>>
-                              <i class="fa-solid fa-paper-plane me-2"></i><%= ctaText %>
-                            </a>
-                          </div>
-                          <!-- === /CTA === -->
-                        <% } %>
-
-                    </div>
-                <% } else if (c?.type === 'media') { %>
-
-                    <div class="col-lg-4 mb-4 vh-50">
+                    <div class="mb-4 vh-50" style="<%= formatElementStyles(c?.styles || []) %>">
                       <!-- Media / Slider -->
                       <div class="rounded shadow w-100 h-100">
                         <% 
