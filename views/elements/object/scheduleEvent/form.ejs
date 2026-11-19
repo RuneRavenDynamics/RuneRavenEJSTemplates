@@ -30,8 +30,12 @@
         } else {
             event = {
                 info: {
+                    type: "scheduleEvent",
                     name: eventSettings.name,
                     description: eventSettings.description,
+                    event_settings: {
+                        type: eventSettings.type
+                    }
                 }
             }
         }
