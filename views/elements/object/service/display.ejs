@@ -91,24 +91,33 @@
     <% } else if (c?.type === 'call_to_action') { %> 
         <div style="<%= formatElementStyles(c?.styles || []) %>">
           <% if (c?.enabled) { %>
-            <!-- === CTA (under quick facts, before media) === -->
-            <%
-              const cta = c;
-              cta.text = cta?.text || object?.info?.data?.cta?.text || null;
-              cta.url = cta?.url || object?.info?.data?.cta?.url || null;
-              const ctaText = (cta && typeof cta.text === 'string' && cta.text.trim()) ? cta.text.trim() : 'Contact Us';
-              const ctaUrl  = (cta && typeof cta.url  === 'string' && cta.url.trim())  ? cta.url.trim()  : '/contact';
-              const isExternal = /^https?:\/\//i.test(ctaUrl);
-            %>
-            <div class="mt-3 d-flex align-items-center justify-content-center">
-              <a
-                href="<%= ctaUrl %>"
-                class="btn btn-primary btn-lg"
-                <% if (isExternal) { %> target="_blank" rel="noopener noreferrer" <% } %>>
-                <i class="fa-solid fa-paper-plane me-2"></i><%= ctaText %>
-              </a>
-            </div>
-            <!-- === /CTA === -->
+            <% if (c?.options?.contact?.enabled) { %>
+              <%
+                const cta = c.options.contact;
+                cta.text = cta?.text || object?.info?.data?.cta?.text || null;
+                cta.url = cta?.url || object?.info?.data?.cta?.url || null;
+                const ctaText = (cta && typeof cta.text === 'string' && cta.text.trim()) ? cta.text.trim() : 'Contact Us';
+                const ctaUrl  = (cta && typeof cta.url  === 'string' && cta.url.trim())  ? cta.url.trim()  : '/contact';
+                const isExternal = /^https?:\/\//i.test(ctaUrl);
+              %>
+              <div class="mt-3 d-flex align-items-center justify-content-center">
+                <a
+                  href="<%= ctaUrl %>"
+                  class="btn btn-primary btn-lg"
+                  <% if (isExternal) { %> target="_blank" rel="noopener noreferrer" <% } %>>
+                  <i class="fa-solid fa-paper-plane me-2"></i><%= ctaText %>
+                </a>
+              </div>
+            <% } %>
+
+            <% if (c?.options?.booking?.enabled) { %>
+              
+            <% } %>
+
+            <% if (c?.options?.payment?.enabled) { %>
+
+            <% } %>
+            
           <% } %>
         </div>
     <% } else if (c?.type === 'media') { %>
