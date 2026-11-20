@@ -1,0 +1,57 @@
+
+
+
+
+
+
+
+
+
+<% context.orientation = context?.orientation || "horizontal"; %>
+    
+<% if (context.orientation === "horizontal") { %>
+    <div data-orientation="horizontal" class="rr-divider d-flex align-items-center gap-3 my-4">
+        <hr class="flex-grow-1 m-0">
+        <span class="text-muted small"><%= context?.text || "" %></span>
+        <hr class="flex-grow-1 m-0">
+    </div>
+<% } else if (context.orientation === "vertical") { %>
+    <div data-orientation="vertical" class="rr-divider d-flex flex-column align-items-center my-4" style="height: 120px;">
+        <div class="flex-grow-1 border-start"></div>
+        <span class="bg-body px-2 text-muted small"><%= context?.text || "" %></span>
+        <div class="flex-grow-1 border-start"></div>
+    </div>
+<% } %>
+
+<script>
+    let dividers = document.querySelectorAll('.rr-divider');
+
+    if (dividers?.length) {
+        for (let d of dividers) {
+            d.orient = async (options={}) => {
+                options.orientation = options?.orientation || ((d?.dataset?.orientation === 'horizontal') ? "vertical" : "horizontal");
+                if (options.orientation === 'vertical') {
+                    d.dataset.orientation = 'vertical';
+                    d.className = "rr-divider d-flex flex-column align-items-center my-4";
+                    d.styles.height = "120px;";
+                    let dText = options?.text || d?.querySelector('span')?.textContent || "";
+                    d.innerHTML = `
+                        <div class="flex-grow-1 border-start"></div>
+                        <span class="bg-body px-2 text-muted small">${dText}</span>
+                        <div class="flex-grow-1 border-start"></div>
+                    `;
+                } else if (options.orientation === 'horizontal') {
+                    d.dataset.orientation = 'horizontal';
+                    d.className = "rr-divider d-flex align-items-center gap-3 my-4";
+                    let dText = options?.text || d?.querySelector('span')?.textContent || "";
+                    d.innerHTML = `
+                        <hr class="flex-grow-1 m-0">
+                        <span class="text-muted small">${dText}</span>
+                        <hr class="flex-grow-1 m-0">
+                    `;
+                }
+            }
+        }
+    }
+</script>
+
