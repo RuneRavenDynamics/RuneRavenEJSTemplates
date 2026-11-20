@@ -7,16 +7,21 @@
 
 
 
-<% context.orientation = context?.orientation || "horizontal"; %>
+<% 
+    context.orientation = context?.orientation || "horizontal";
+    context.text = context?.text || "";
+    context.width = context?.width || "120px";
+    context.height = context?.height || "120px";
+%>
     
 <% if (context.orientation === "horizontal") { %>
-    <div data-orientation="horizontal" class="rr-divider d-flex align-items-center gap-3 my-4">
+    <div data-orientation="horizontal" class="rr-divider d-flex align-items-center gap-3 my-4" style="width: <%= context.width %>;">
         <hr class="flex-grow-1 m-0">
         <span class="text-muted small"><%= context?.text || "" %></span>
         <hr class="flex-grow-1 m-0">
     </div>
 <% } else if (context.orientation === "vertical") { %>
-    <div data-orientation="vertical" class="rr-divider d-flex flex-column align-items-center my-4" style="height: 120px;">
+    <div data-orientation="vertical" class="rr-divider d-flex flex-column align-items-center my-4" style="height: <%= context.height %>;">
         <div class="flex-grow-1 border-start"></div>
         <span class="bg-body px-2 text-muted small"><%= context?.text || "" %></span>
         <div class="flex-grow-1 border-start"></div>
@@ -33,7 +38,7 @@
                 if (options.orientation === 'vertical') {
                     d.dataset.orientation = 'vertical';
                     d.className = "rr-divider d-flex flex-column align-items-center my-4";
-                    d.styles.height = "120px;";
+                    d.styles.height = options?.height || d.styles.height;
                     let dText = options?.text || d?.querySelector('span')?.textContent || "";
                     d.innerHTML = `
                         <div class="flex-grow-1 border-start"></div>
@@ -43,6 +48,7 @@
                 } else if (options.orientation === 'horizontal') {
                     d.dataset.orientation = 'horizontal';
                     d.className = "rr-divider d-flex align-items-center gap-3 my-4";
+                    d.styles.width = options?.width || d.styles.width;
                     let dText = options?.text || d?.querySelector('span')?.textContent || "";
                     d.innerHTML = `
                         <hr class="flex-grow-1 m-0">
