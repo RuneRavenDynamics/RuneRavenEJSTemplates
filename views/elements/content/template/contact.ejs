@@ -109,7 +109,7 @@
 </style>
 
 
-<section class="container py-5" id="<%= elementId %>" style="<%= formatElementStyles(element.styles || []) %>" <%= typeof scrollElement !== 'undefined' && scrollElement ? 'data-scroll-section' : '' %>>
+<section id="<%= elementId %>" style="<%= element?.formatted?.styles || "" %>" class="container py-5 <%= element?.formatted?.classes || "" %>" <%= typeof scrollElement !== 'undefined' && scrollElement ? 'data-scroll-section' : '' %>>
     <% 
       let location = elementData.object; 
       location.email = element?.template?.options?.email || null;

@@ -73,6 +73,6 @@
 
 
 
-<section id="<%= elementId %>" style="<%= formatElementStyles(element.styles || []) %>" <%= typeof scrollElement !== 'undefined' && scrollElement ? 'data-scroll-section' : '' %>>
+<section id="<%= elementId %>" style="<%= element?.formatted?.styles || "" %>" class="<%= element?.formatted?.classes || "" %>" <%= typeof scrollElement !== 'undefined' && scrollElement ? 'data-scroll-section' : '' %>>
     <%- include(`../../object/container/list`, {objects: elementData}) %>
 </section>

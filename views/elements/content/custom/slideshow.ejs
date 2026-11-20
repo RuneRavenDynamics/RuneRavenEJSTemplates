@@ -7,7 +7,7 @@
 
 
 
-<button type="button" id="<%= elementId %>" style="<%= formatElementStyles(element.styles || []) %>" <%= typeof scrollElement !== 'undefined' && scrollElement ? 'data-scroll-section' : '' %>>
+<button type="button" id="<%= elementId %>" style="<%= element?.formatted?.styles || "" %>" class="<%= element?.formatted?.classes || "" %>" <%= typeof scrollElement !== 'undefined' && scrollElement ? 'data-scroll-section' : '' %>>
     <%- include('../../media/carousel', {
         slideshow: {
             id: `business-hero-${elementId}`,

@@ -17,6 +17,10 @@
 
 <% for (let content of page.info.page_settings.content.body) { %>
 
+    <%
+        content.formatted = formatElementStyles(content.styles || []);
+    %>
+
     <% if (content.type === 'object') { %>
 
         <%- include(`../../elements/content/object/element`, {elementId: content.elementId, element: content, elementData: page.data[content.elementId], scrollElement: true}) %>

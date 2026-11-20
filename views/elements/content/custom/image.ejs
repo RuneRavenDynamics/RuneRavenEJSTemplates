@@ -7,5 +7,5 @@
 
 
 
-<img src="<%= element.element.options?.media?.url %>" id="<%= elementId %>" style="<%= formatElementStyles(element.styles || []) %>" <%= typeof scrollElement !== 'undefined' && scrollElement ? 'data-scroll-section' : '' %>>
+<img src="<%= element.element.options?.media?.url %>" id="<%= elementId %>" style="<%= element?.formatted?.styles || "" %>" class="<%= element?.formatted?.classes || "" %>" <%= typeof scrollElement !== 'undefined' && scrollElement ? 'data-scroll-section' : '' %>>
 </img>

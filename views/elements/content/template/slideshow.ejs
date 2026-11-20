@@ -8,9 +8,8 @@
 
 
 <section 
-    class="vw-100 vh-50 mb-2" 
     id="<%= elementId %>" 
-    style="<%= formatElementStyles(element.styles || []) %>" 
+    style="<%= element?.formatted?.styles || "" %>" class="vw-100 vh-50 mb-2 <%= element?.formatted?.classes || "" %>" 
     <%= typeof scrollElement !== 'undefined' && scrollElement ? 'data-scroll-section' : '' %>
     >
     <% if (element.template.options.type === 'custom') { %>

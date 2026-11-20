@@ -7,8 +7,12 @@
 
 
 
-<div class="d-flex flex-wrap" id="<%= elementId %>" style="<%= formatElementStyles(element.styles || []) %>" <%= typeof scrollElement !== 'undefined' && scrollElement ? 'data-scroll-section' : '' %>>
+<div class="d-flex flex-wrap" id="<%= elementId %>" style="<%= element?.formatted?.styles || "" %>" class="<%= element?.formatted?.classes || "" %>" <%= typeof scrollElement !== 'undefined' && scrollElement ? 'data-scroll-section' : '' %>>
     <% for (let content of element.element.options?.content || []) { %>
+
+        <%
+            content.formatted = formatElementStyles(content.styles || []);
+        %>
 
         <% if (content.type === 'object') { %>
 
