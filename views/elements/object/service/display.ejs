@@ -91,6 +91,7 @@
     <% } else if (c?.type === 'call_to_action') { %> 
         <div style="<%= formatElementStyles(c?.styles || []) %>">
           <% if (c?.enabled) { %>
+            <% let divide = false; %>
             <% if (c?.options?.contact?.enabled) { %>
               <%
                 const cta = c.options.contact;
@@ -108,13 +109,110 @@
                   <i class="fa-solid fa-paper-plane me-2"></i><%= ctaText %>
                 </a>
               </div>
+              <% divide = true; %>
             <% } %>
 
             <% if (c?.options?.booking?.enabled) { %>
-              
+              <% if (divide) { %>
+                <div class="d-flex flex-column align-items-center my-4" style="height: 120px;">
+                  <div class="flex-grow-1 border-start"></div>
+                  <span class="bg-body px-2 text-muted small">OR</span>
+                  <div class="flex-grow-1 border-start"></div>
+                </div>
+              <% } %>
+              <div class="card shadow" id="service-booking-element">
+                <div class="card-header text-white">
+                  <h3 class="mb-0 card-title" id="event-form-title"></h3>
+                </div>
+                <div class="card-body" id="event-element">
+
+                </div>
+              </div>
+                <script type="module">
+                  import { api } from "https://cdn.runeravendynamics.com/clientapi/latest/api.bundle.js";
+
+                  await api.initialize();
+
+                  async function setupEvent() {
+                    const eventPaneTitle = document.querySelector('#event-form-title');
+                    const eventPane = document.querySelector("#event-element");
+
+                    api.tools.LM.load(true, eventPane);
+
+                    let data = <%- JSON.stringify({ options: c.options.booking }) %>;
+                    let eventSettings = data.options;
+                    eventPaneTitle.textContent = eventSettings.name;
+
+                    let event = {
+                        info: {
+                            type: "scheduleEvent",
+                            name: eventSettings.name,
+                            description: eventSettings.description,
+                            event_settings: {
+                                type: eventSettings.type
+                            }
+                        }
+                    }
+                    let schedule = await api.graph.get(eventSettings.schedule.id, eventSettings.schedule.type);
+
+                    eventPane.innerHTML = "";
+
+                    let eventOptions = {
+                        id: `event-form-element`,
+                        content: null,
+                        element: "booking",
+                        settings: {
+                            titleSettings: {
+                                show: false
+                            },
+                            contentSettings: {
+                                element: "form"
+                            },
+                            objectSettings: {
+                                business: api.app.data.business,
+                                schedule,
+                                bookingSettings: {
+                                    steps: [
+                                        'event'
+                                    ],
+                                    eventSettings: {
+                                        flow: "steps",
+                                        name: false,
+                                        description: {
+                                            content: eventSettings.description
+                                        },
+                                        customer: true,
+                                        duration: eventSettings?.duration || 60,
+                                        start: eventSettings?.period?.start || null,
+                                        end: eventSettings?.period?.end || null
+                                    }
+                                }
+                            }
+                        },
+                        inherited: {
+                            object: event
+                        }
+                    }
+                    
+                    let eventElement = await api.elements.runeraven.createElement(eventOptions);
+                    eventPane.appendChild(eventElement);
+                    await api.graph.elements.callDisplayCallbacksWhenConnected(eventElement);
+
+                    api.tools.LM.load(false, eventPane);
+                  }
+
+                  await setupEvent();
+                </script>
             <% } %>
 
             <% if (c?.options?.payment?.enabled) { %>
+              <% if (divide) { %>
+                <div class="d-flex flex-column align-items-center my-4" style="height: 120px;">
+                  <div class="flex-grow-1 border-start"></div>
+                  <span class="bg-body px-2 text-muted small">OR</span>
+                  <div class="flex-grow-1 border-start"></div>
+                </div>
+              <% } %>
 
             <% } %>
             
