@@ -89,28 +89,9 @@
               <% } %>
         </div>
     <% } else if (c?.type === 'call_to_action') { %> 
-        <div style="<%= formatElementStyles(c?.styles || []) %>">
+        <div class="d-flex align-items-center justify-content-evenly" style="<%= formatElementStyles(c?.styles || []) %>">
           <% if (c?.enabled) { %>
             <% let divide = false; %>
-            <% if (c?.options?.contact?.enabled) { %>
-              <%
-                const cta = c.options.contact;
-                cta.text = cta?.text || object?.info?.data?.cta?.text || null;
-                cta.url = cta?.url || object?.info?.data?.cta?.url || null;
-                const ctaText = (cta && typeof cta.text === 'string' && cta.text.trim()) ? cta.text.trim() : 'Contact Us';
-                const ctaUrl  = (cta && typeof cta.url  === 'string' && cta.url.trim())  ? cta.url.trim()  : '/contact';
-                const isExternal = /^https?:\/\//i.test(ctaUrl);
-              %>
-              <div class="mt-3 d-flex align-items-center justify-content-center">
-                <a
-                  href="<%= ctaUrl %>"
-                  class="btn btn-primary btn-lg"
-                  <% if (isExternal) { %> target="_blank" rel="noopener noreferrer" <% } %>>
-                  <i class="fa-solid fa-paper-plane me-2"></i><%= ctaText %>
-                </a>
-              </div>
-              <% divide = true; %>
-            <% } %>
 
             <% if (c?.options?.booking?.enabled) { %>
               <% if (divide) { %>
@@ -120,9 +101,9 @@
                   <div class="flex-grow-1 border-start"></div>
                 </div>
               <% } %>
-              <div class="card shadow" id="service-booking-element">
+              <div class="card shadow" style="max-width: 60%;" id="service-booking-element">
                 <div class="card-header text-white">
-                  <h3 class="mb-0 card-title" id="event-form-title"></h3>
+                  <h3 class="mb-0 fs-6 card-title" id="event-form-title"></h3>
                 </div>
                 <div class="card-body" id="event-element">
 
@@ -203,6 +184,8 @@
 
                   await setupEvent();
                 </script>
+
+                <% divide = true; %>
             <% } %>
 
             <% if (c?.options?.payment?.enabled) { %>
@@ -214,6 +197,34 @@
                 </div>
               <% } %>
 
+              <% divide = true; %>
+            <% } %>
+
+            <% if (c?.options?.contact?.enabled) { %>
+              <% if (divide) { %>
+                <div class="d-flex flex-column align-items-center my-4" style="height: 120px;">
+                  <div class="flex-grow-1 border-start"></div>
+                  <span class="bg-body px-2 text-muted small">OR</span>
+                  <div class="flex-grow-1 border-start"></div>
+                </div>
+              <% } %>
+
+              <%
+                const cta = c.options.contact;
+                cta.text = cta?.text || object?.info?.data?.cta?.text || null;
+                cta.url = cta?.url || object?.info?.data?.cta?.url || null;
+                const ctaText = (cta && typeof cta.text === 'string' && cta.text.trim()) ? cta.text.trim() : 'Contact Us';
+                const ctaUrl  = (cta && typeof cta.url  === 'string' && cta.url.trim())  ? cta.url.trim()  : '/contact';
+                const isExternal = /^https?:\/\//i.test(ctaUrl);
+              %>
+              <div class="mt-3 d-flex align-items-center justify-content-center">
+                <a
+                  href="<%= ctaUrl %>"
+                  class="btn btn-primary btn-lg"
+                  <% if (isExternal) { %> target="_blank" rel="noopener noreferrer" <% } %>>
+                  <i class="fa-solid fa-paper-plane me-2"></i><%= ctaText %>
+                </a>
+              </div>
             <% } %>
             
           <% } %>
