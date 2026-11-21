@@ -50,13 +50,7 @@
   const subtitle = content.subtitle || '';
   const message = content.message || '';
   const items = Array.isArray(content.items) ? content.items : [];
-  const settings = content?.settings || {
-    rowcount: {
-        'sm': 1,
-        'md': 2,
-        'lg': 3
-    }
-  };
+  const settings = content?.settings || {};
 %>
 
 <% 
@@ -206,14 +200,14 @@
             </div>
             
             <div class="col">
-                <div class="row row-cols-1 row-cols-sm-<%= settings.rowcount.sm %> row-cols-md-<%= settings.rowcount.md %> row-cols-lg-<%= settings.rowcount.lg %> g-4 py-5">
+                <div class="row row-cols-1 row-cols-sm-<%= settings?.rowcount?.sm || 1 %> row-cols-md-<%= settings?.rowcount?.md || 2 %> row-cols-lg-<%= settings?.rowcount?.lg || 3 %> g-4 py-5">
                     <% buildItems(items); %>
                 </div>
             </div>
         </div>
     <% } else { %>
 
-        <div class="row row-cols-1 row-cols-sm-<%= settings.rowcount.sm %> row-cols-md-<%= settings.rowcount.md %> row-cols-lg-<%= settings.rowcount.lg %> g-4 py-5">
+        <div class="row row-cols-1 row-cols-sm-<%= settings?.rowcount?.sm || 1 %> row-cols-md-<%= settings?.rowcount?.md || 2 %> row-cols-lg-<%= settings?.rowcount?.lg || 3 %> g-4 py-5">
             <% buildItems(items); %>
         </div>
     <% } %>
