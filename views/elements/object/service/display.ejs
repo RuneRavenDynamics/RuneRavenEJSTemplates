@@ -92,15 +92,15 @@
     %>
 
     <% if (c?.type === 'description') { %> 
-        <div style="<%= element?.formatted?.styles || "" %>" class="rr-element <%= element?.formatted?.classes || "" %>">
+        <div style="<%= c?.formatted?.styles || "" %>" class="rr-element <%= c?.formatted?.classes || "" %>">
           <p><%= object.info.description %></p>
         </div>
     <% } else if (c?.type === 'long_description') { %> 
-        <div style="<%= element?.formatted?.styles || "" %>" class="rr-element <%= element?.formatted?.classes || "" %>">
+        <div style="<%= c?.formatted?.styles || "" %>" class="rr-element <%= c?.formatted?.classes || "" %>">
           <p><%= object.info.long_description %></p>
         </div>
     <% } else if (c?.type === 'quick_facts') { %> 
-        <div style="<%= element?.formatted?.styles || "" %>" class="rr-element <%= element?.formatted?.classes || "" %>">
+        <div style="<%= c?.formatted?.styles || "" %>" class="rr-element <%= c?.formatted?.classes || "" %>">
             <% const quickFacts = [
                 { icon: 'fa-solid fa-layer-group', label: 'Type',     value: object.info.service_settings?.type ? formatHeading(object.info.service_settings.type) : null },
                 { icon: 'fa-solid fa-tag',      label: 'Base price',  value: formatMoney(object.info.service_settings.pricing.amount, object.info.service_settings.pricing.currency) },
@@ -127,7 +127,7 @@
               <% } %>
         </div>
     <% } else if (c?.type === 'call_to_action') { %> 
-        <div style="<%= element?.formatted?.styles || "" %>" class="rr-element d-flex flex-column align-items-center justify-content-evenly <%= element?.formatted?.classes || "" %>">
+        <div style="<%= c?.formatted?.styles || "" %>" class="rr-element d-flex flex-column align-items-center justify-content-evenly <%= c?.formatted?.classes || "" %>">
           <% if (c?.enabled) { %>
             <% let divide = false; %>
 
@@ -264,7 +264,7 @@
         </div>
     <% } else if (c?.type === 'media') { %>
 
-          <div style="<%= element?.formatted?.styles || "" %>" class="rr-element mb-4 vh-50 <%= element?.formatted?.classes || "" %>">
+          <div style="<%= c?.formatted?.styles || "" %>" class="rr-element mb-4 vh-50 <%= c?.formatted?.classes || "" %>">
             <!-- Media / Slider -->
             <div class="rounded shadow w-100 h-100">
               <% 
@@ -321,7 +321,7 @@
         <% } %>
 
     <% } else if (c?.type === 'container') { %>
-          <div style="<%= element?.formatted?.styles || "" %>" class="rr-element <%= element?.formatted?.classes || "" %>">
+          <div style="<%= c?.formatted?.styles || "" %>" class="rr-element <%= c?.formatted?.classes || "" %>">
                 <% for (const sc of c?.options?.content || []) { %>
                       <% buildElement(sc); %>
                 <% } %>
