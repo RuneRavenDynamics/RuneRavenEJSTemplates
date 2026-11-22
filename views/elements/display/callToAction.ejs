@@ -13,7 +13,7 @@
 
     <% if (context?.options?.booking?.enabled) { %>
         <% if (divide) { %>
-            <%- include('../../utility/divider', { context: { orientation: "horizontal", text: "OR" } }) %>
+            <%- include('../utility/divider', { context: { orientation: "horizontal", text: "OR" } }) %>
         <% } %>
 
         <div id="event-element" class="w-90">
@@ -109,7 +109,7 @@
 
     <% if (context?.options?.payment?.enabled) { %>
         <% if (divide) { %>
-        <%- include('../../utility/divider', { context: { orientation: "horizontal", text: "OR" } }) %>
+        <%- include('../utility/divider', { context: { orientation: "horizontal", text: "OR" } }) %>
         <% } %>
 
         <% divide = true; %>
@@ -117,7 +117,7 @@
 
     <% if (context?.options?.contact?.enabled) { %>
         <% if (divide) { %>
-            <%- include('../../utility/divider', { context: { orientation: "horizontal", text: "OR" } }) %>
+            <%- include('../utility/divider', { context: { orientation: "horizontal", text: "OR" } }) %>
         <% } %>
 
         <%
