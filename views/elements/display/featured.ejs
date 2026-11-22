@@ -50,6 +50,7 @@
   const subtitle = content.subtitle || '';
   const message = content.message || '';
   const items = Array.isArray(content.items) ? content.items : [];
+  const call_to_action = content?.call_to_action || {};
   const settings = content?.settings || {};
 %>
 
@@ -190,12 +191,13 @@
             <div class="col d-flex flex-column align-items-start gap-2">
                 <h4 class="fw-bold text-body-emphasis"><%= subtitle || title || 'Features' %></h4>
                 <% if (message) { %>
-                <p class="text-body-secondary"><%= message %></p>
+                  <p class="text-body-secondary"><%= message %></p>
                 <% } %>
-                <% if (content.link && content.link?.url) { %>
-                <a href="<%= content.link.url %>" class="btn btn-primary btn-lg">
-                    <%= content.link.text || 'Primary button' %>
-                </a>
+
+                <% if (call_to_action?.enabled) { %>
+                  <%- include('./callToAction', { 
+                      context: call_to_action
+                    }) %>
                 <% } %>
             </div>
             

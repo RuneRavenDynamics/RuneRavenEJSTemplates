@@ -1,0 +1,144 @@
+
+
+
+
+
+
+
+
+
+<div style="<%= context?.formatted?.styles || "" %>" class="rr-element d-flex flex-column align-items-center justify-content-evenly <%= context?.formatted?.classes || "" %>">
+    <% if (context?.enabled) { %>
+    <% let divide = false; %>
+
+    <% if (context?.options?.booking?.enabled) { %>
+        <% if (divide) { %>
+            <%- include('../../utility/divider', { context: { orientation: "horizontal", text: "OR" } }) %>
+        <% } %>
+
+        <div id="event-element" class="w-90">
+
+        </div>
+        <script type="module">
+            import { api } from "https://cdn.runeravendynamics.com/clientapi/latest/api.bundle.js";
+
+            await api.initialize();
+            
+            let data = <%- JSON.stringify({ options: context?.options.booking }) %>;
+            const eventContainer = document.querySelector("#event-element");
+            const eventPane = document.createElement('div');
+            eventPane.className = "p-4";
+
+            let bookingButton = await api.elements.element({
+                api: "bootstrap",
+                element: "accordionitem",
+                id: "booking-button",
+                title: `<h3 class="mb-0 fs-6">${data.options?.name || "Schedule Appointment"}</h3>`,
+                content: eventPane,
+                parent: eventContainer
+            })
+
+            async function setupEvent() {                    
+
+                api.tools.LM.load(true, eventPane);
+                
+                let eventSettings = data.options;
+
+                let event = {
+                    info: {
+                        type: "scheduleEvent",
+                        name: eventSettings.name,
+                        description: eventSettings.description,
+                        event_settings: {
+                            type: eventSettings.type
+                        }
+                    }
+                }
+                let schedule = await api.graph.get(eventSettings.schedule.id, eventSettings.schedule.type);
+
+                eventPane.innerHTML = "";
+
+                let eventOptions = {
+                    id: `event-form-element`,
+                    content: null,
+                    element: "booking",
+                    settings: {
+                        titleSettings: {
+                            show: false
+                        },
+                        contentSettings: {
+                            element: "form"
+                        },
+                        objectSettings: {
+                            business: api.app.data.business,
+                            schedule,
+                            bookingSettings: {
+                                steps: [
+                                    'event'
+                                ],
+                                eventSettings: {
+                                    flow: "steps",
+                                    name: false,
+                                    description: {
+                                        content: eventSettings.description
+                                    },
+                                    customer: true,
+                                    duration: eventSettings?.duration || 60,
+                                    period: eventSettings?.period || null,
+                                }
+                            }
+                        }
+                    },
+                    inherited: {
+                        object: event
+                    }
+                }
+                
+                let eventElement = await api.elements.runeraven.createElement(eventOptions);
+                eventPane.appendChild(eventElement);
+                await api.graph.elements.callDisplayCallbacksWhenConnected(eventElement);
+
+                api.tools.LM.load(false, eventPane);
+            }
+
+            await setupEvent();
+        </script>
+
+        <% divide = true; %>
+    <% } %>
+
+    <% if (context?.options?.payment?.enabled) { %>
+        <% if (divide) { %>
+        <%- include('../../utility/divider', { context: { orientation: "horizontal", text: "OR" } }) %>
+        <% } %>
+
+        <% divide = true; %>
+    <% } %>
+
+    <% if (context?.options?.contact?.enabled) { %>
+        <% if (divide) { %>
+            <%- include('../../utility/divider', { context: { orientation: "horizontal", text: "OR" } }) %>
+        <% } %>
+
+        <%
+            const cta = context?.options.contact;
+            cta.text = cta?.text || object?.info?.data?.cta?.text || null;
+            cta.url = cta?.url || object?.info?.data?.cta?.url || null;
+            const ctaText = (cta && typeof cta.text === 'string' && cta.text.trim()) ? cta.text.trim() : 'Contact Us';
+            const ctaUrl  = (cta && typeof cta.url  === 'string' && cta.url.trim())  ? cta.url.trim()  : '/contact';
+            const isExternal = /^https?:\/\//i.test(ctaUrl);
+        %>
+        <div class="mt-3 d-flex align-items-center justify-content-center">
+            <a
+                href="<%= ctaUrl %>"
+                class="btn btn-primary btn-lg"
+                <% if (isExternal) { %> target="_blank" rel="noopener noreferrer" <% } %>>
+                <i class="fa-solid fa-paper-plane me-2"></i><%= ctaText %>
+            </a>
+        </div>
+
+        <% divide = true; %>
+    <% } %>
+    
+    <% } %>
+</div>
