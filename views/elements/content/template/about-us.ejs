@@ -56,7 +56,7 @@
                                 <div class="swiper-wrapper">
                                     <% for (const [key, media] of Object.entries(business.info.about.media)) { %>
                                         <div class="swiper-slide">
-                                            <img src="<%= media %>" alt="<%= key %>" class="img-fluid rounded shadow" loading="lazy">
+                                            <img src="<%= media?.url || media %>" alt="<%= media?.name || key %>" class="img-fluid rounded shadow" loading="lazy">
                                             <div class="swiper-lazy-preloader"></div>
                                         </div>
                                     <% } %>
